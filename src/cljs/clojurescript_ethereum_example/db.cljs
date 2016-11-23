@@ -24,4 +24,5 @@
                     }
    :drawer         {:open false
                     }
+   :page           0
    })

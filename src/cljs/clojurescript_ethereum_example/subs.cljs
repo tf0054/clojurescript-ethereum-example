@@ -30,3 +30,8 @@
  :db/drawer
  (fn [db]
    (:drawer db)))
+
+(reg-sub
+ :db/page
+ (fn [db]
+   (:page db)))

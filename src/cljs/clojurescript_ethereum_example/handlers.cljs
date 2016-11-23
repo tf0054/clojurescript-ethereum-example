@@ -84,10 +84,10 @@
                          :max-tweet-length (.toNumber max-tweet-length)})))
 
 (reg-event-db
-  :blockchain/balance-loaded
-  interceptors
-  (fn [db [balance address]]
-    (assoc-in db [:accounts address :balance] balance)))
+ :blockchain/balance-loaded
+ interceptors
+ (fn [db [balance address]]
+   (assoc-in db [:accounts address :balance] balance)))
 
 (reg-event-db
  :new-tweet/update
@@ -196,3 +196,12 @@
    ;;{:db db}
    ;;db
    ))
+
+(reg-event-db
+ :ui/page
+ interceptors
+ (fn [db [x]]
+   (console :log "hendler:ui/page" (get-in db [:page]) x)
+   (assoc-in db [:page] x)
+   ))
+
