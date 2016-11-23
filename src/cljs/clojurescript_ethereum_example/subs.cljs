@@ -22,6 +22,11 @@
     (:settings db)))
 
 (reg-sub
-  :new-tweet/selected-address-balance
-  (fn [db]
-    (get-in db [:accounts (:address (:new-tweet db)) :balance])))
+ :new-tweet/selected-address-balance
+ (fn [db]
+   (get-in db [:accounts (:address (:new-tweet db)) :balance])))
+
+(reg-sub
+ :db/drawer
+ (fn [db]
+   (:drawer db)))

@@ -35,7 +35,7 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :figwheel {:css-dirs ["resources/public/css"]
-             :server-port 6777
+             :server-port 8080
              :ring-handler user/http-handler}
 
   :auto {"compile-solidity" {:file-pattern #"\.(sol)$"

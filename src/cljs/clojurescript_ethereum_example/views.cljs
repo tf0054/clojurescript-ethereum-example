@@ -11,27 +11,27 @@
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
 
 (defn- new-tweet-component []
-  (let [settings (subscribe [:db/settings])
-        new-tweet (subscribe [:db/new-tweet])
+  (let [settings     (subscribe [:db/settings])
+        new-tweet    (subscribe [:db/new-tweet])
         my-addresses (subscribe [:db/my-addresses])
-        balance (subscribe [:new-tweet/selected-address-balance])]
+        balance      (subscribe [:new-tweet/selected-address-balance])]
     (fn []
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
         [ui/paper {:style {:padding "0 20px 20px"}}
-         [ui/text-field {:default-value (:name @new-tweet)
-                         :on-change #(dispatch [:new-tweet/update :name (u/evt-val %)])
-                         :name "name"
-                         :max-length (:max-name-length @settings)
+         [ui/text-field {:default-value       (:name @new-tweet)
+                         :on-change           #(dispatch [:new-tweet/update :name (u/evt-val %)])
+                         :name                "name"
+                         :max-length          (:max-name-length @settings)
                          :floating-label-text "Your Name"
-                         :style {:width "100%"}}]
+                         :style               {:width "70%"}}]
          [:br]
-         [ui/text-field {:default-value (:text @new-tweet)
-                         :on-change #(dispatch [:new-tweet/update :text (u/evt-val %)])
-                         :name "tweet"
-                         :max-length (:max-tweet-length @settings)
+         [ui/text-field {:default-value       (:text @new-tweet)
+                         :on-change           #(dispatch [:new-tweet/update :text (u/evt-val %)])
+                         :name                "tweet"
+                         :max-length          (:max-tweet-length @settings)
                          :floating-label-text "What's happening?"
-                         :style {:width "100%"}}]
+                         :style               {:width "100%"}}]
          [:br]
          [address-select-field
           @my-addresses
@@ -41,14 +41,15 @@
          [:h3 "Balance: " (u/eth @balance)]
          [:br]
          [ui/raised-button
-          {:secondary true
-           :disabled (or (empty? (:text @new-tweet))
-                         (empty? (:name @new-tweet))
-                         (empty? (:address @new-tweet))
-                         (:sending? @new-tweet))
-           :label "Tweet"
-           :style {:margin-top 15}
-           :on-touch-tap #(dispatch [:new-tweet/send])}]]]])))
+          {:secondary    true
+           :disabled     (or (empty? (:text @new-tweet))
+                             (empty? (:name @new-tweet))
+                             (empty? (:address @new-tweet))
+                             (:sending? @new-tweet))
+           :label        "Tweet"
+           :style        {:margin-top 15}
+           :on-touch-tap #(dispatch [:new-tweet/send])
+           }]]]])))
 
 (defn- tweets-component []
   (let [tweets (subscribe [:db/tweets])]
@@ -59,7 +60,7 @@
          [:h1 "Tweets"]
          (for [{:keys [tweet-key name text date author-address]} @tweets]
            [:div {:style {:margin-top 20}
-                  :key tweet-key}
+                  :key   tweet-key}
             [:h3 name]
             [:h5 (u/format-date date)]
             [:div {:style {:margin-top 5}}
@@ -68,13 +69,33 @@
              author-address]
             [ui/divider]])]]])))
 
+(defn- drawer-component []
+  (let [drawer (subscribe [:db/drawer])]
+    (fn []
+      [ui/drawer {:docked false
+                  :open   (:open @drawer)
+                  }
+       [ui/menu-item {:onTouchTap #(dispatch [:ui/drawer])} "A"]
+       [ui/menu-item "B"]
+       [ui/menu-item "C"]
+       ]
+      )
+    )
+  )
+
 (defn main-panel []
   (let []
     (fn []
       [ui/mui-theme-provider
        {:mui-theme (get-mui-theme {:palette {:primary1-color (color :light-blue500)
-                                             :accent1-color (color :amber700)}})}
+                                             :accent1-color  (color :amber700)}})}
        [:div
-        [ui/app-bar {:title "Simple Decentralized Twitter"}]
+        [ui/app-bar {:title                    "Simple Decentralized Twitter"
+                     :onLeftIconButtonTouchTap #(do (dispatch [:ui/drawer])
+                                                    ;; (println "LeftNav")
+                                                    )
+                     }]
+        [drawer-component]
         [new-tweet-component]
         [tweets-component]]])))
+
