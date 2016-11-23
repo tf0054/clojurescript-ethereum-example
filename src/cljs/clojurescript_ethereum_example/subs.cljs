@@ -35,3 +35,8 @@
  :db/page
  (fn [db]
    (:page db)))
+
+(reg-sub
+ :db/tweetsNum
+ (fn [db]
+   (:tweetsNum db)))

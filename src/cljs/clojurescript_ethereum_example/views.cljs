@@ -17,16 +17,19 @@
       [ui/drawer {:docked false
                   :open   (:open @drawer)
                   }
-       [ui/menu-item {:onTouchTap #(dispatch [:ui/drawer])} "A"]
-       [ui/menu-item {:onTouchTap #(dispatch [:ui/page 1])} "B"]
-       [ui/menu-item {:onTouchTap #(dispatch [:ui/page 0])} "C"]
+       [ui/menu-item {:onTouchTap #(dispatch [:ui/drawer])} "-CLOSE-"]
+       [ui/menu-item {:onTouchTap #(do
+                                     (dispatch [:ui/page 1])
+                                     (dispatch [:ui/drawer]))} "development"]
+       [ui/menu-item {:onTouchTap #(do
+                                     (dispatch [:ui/page 0])
+                                     (dispatch [:ui/drawer]))} "default"]
        ]
       )
     )
   )
 
 (defn- display [x y]
-  (println "display" x y)
   (if (== x y)
     {:style {:display "block"}}
     {:style {:display "none"}}
@@ -34,7 +37,8 @@
   )
 
 (defn main-panel []
-  (let [page (subscribe [:db/page])]
+  (let [page (subscribe [:db/page])
+        num  (subscribe [:db/tweetsNum])]
     (fn []
       [ui/mui-theme-provider
        {:mui-theme (get-mui-theme {:palette {:primary1-color (color :light-blue500)
@@ -46,11 +50,21 @@
                                                     )
                      }]
         [drawer-component]
-        
+        ;; default
         [:div (display @page 0)
          [v_twitter/new-tweet-component]
          [v_twitter/tweets-component]
          ]
-        
+        ;; development
+        [:div (display @page 1)
+         @num
+         [:br]
+         [ui/raised-button
+          {:secondary    true
+           :label        "getTweetsNum"
+           :style        {:margin-top 15}
+           :on-touch-tap #(dispatch [:tf0054/getTweetsNum])
+           }]
+         ]
         ]])))
 

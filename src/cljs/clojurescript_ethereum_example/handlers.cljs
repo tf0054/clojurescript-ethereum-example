@@ -69,12 +69,12 @@
         :fns [[:get-settings :contract/settings-loaded :log-error]]}})))
 
 (reg-event-db
-  :contract/on-tweet-loaded
-  interceptors
-  (fn [db [tweet]]
-    (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
-                                   {:date (u/big-number->date-time (:date tweet))
-                                    :tweet-key (.toNumber (:tweet-key tweet))}))))
+ :contract/on-tweet-loaded
+ interceptors
+ (fn [db [tweet]]
+   (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
+                                  {:date      (u/big-number->date-time (:date tweet))
+                                   :tweet-key (.toNumber (:tweet-key tweet))}))))
 
 (reg-event-db
   :contract/settings-loaded
@@ -156,12 +156,12 @@
                :log-error]]}})))
 
 (reg-event-fx
-  :blockchain/unlock-account
-  interceptors
-  (fn [{:keys [db]} [address password]]
-    {:web3-fx.blockchain/fns
-     {:web3 (:web3 db)
-      :fns [[web3-personal/unlock-account address password 999999
+ :blockchain/unlock-account
+ interceptors
+ (fn [{:keys [db]} [address password]]
+   {:web3-fx.blockchain/fns
+    {:web3 (:web3 db)
+     :fns  [[web3-personal/unlock-account address password 999999
              :blockchain/account-unlocked
              :log-error]]}}))
 
@@ -173,11 +173,11 @@
     {}))
 
 (reg-event-fx
-  :contract/deployed
-  interceptors
-  (fn [_ [contract-instance]]
-    (when-let [address (aget contract-instance "address")]
-      (console :log "Contract deployed at" address))))
+ :contract/deployed
+ interceptors
+ (fn [_ [contract-instance]]
+   (when-let [address (aget contract-instance "address")]
+     (console :log "Contract deployed at" address))))
 
 (reg-event-fx
  :log-error
@@ -201,7 +201,23 @@
  :ui/page
  interceptors
  (fn [db [x]]
-   (console :log "hendler:ui/page" (get-in db [:page]) x)
+   (console :log "hendler:ui/page" (get-in db [:page]) "->" x)
    (assoc-in db [:page] x)
    ))
 
+(reg-event-fx
+ :tf0054/getTweetsNum
+ interceptors
+ (fn [{:keys [db]} []]
+   (let []
+     (console :log "hendler:ui/getTweetsNum")
+     {:web3-fx.contract/constant-fns
+      {:instance (:instance (:contract db))
+       :fns      [[:get-tweets-num ;; have to call with kebab-case (-> GetTweetsNum)
+                   :ui/tweetsNum :log-error]]}})))
+
+(reg-event-db
+ :ui/tweetsNum
+ interceptors
+ (fn [db [x]]
+   (assoc db :tweetsNum (.toNumber x))))

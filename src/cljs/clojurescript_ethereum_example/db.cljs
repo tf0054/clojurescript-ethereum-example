@@ -19,10 +19,12 @@
                     :abi      nil
                     :bin      nil
                     :instance nil
-                    :address  "0x1a962b69f59b6879a0c25874aa86f8f2658aa368"
-                    ;; :address "0xe70a510651c3394f546f187c441303fd6520a1cd"
+                    ;; :address  "0x1a962b69f59b6879a0c25874aa86f8f2658aa368"
+                    ;; :address  "0x7B51E82Cbeed5732845CFDFe58CFE9099a61d5De"
+                    :address  "0x5dF19f207F18f86C7106Fe5835f4075f78A593A8"
                     }
    :drawer         {:open false
                     }
    :page           0
+   :tweetsNum      0
    })

@@ -47,4 +47,8 @@ contract SimpleTwitter {
         maxNameLength = _maxNameLength;
         maxTweetLength = _maxTweetLength;
     }
+
+    function getTweetsNum() constant returns(uint16) {
+        return uint16(tweets.length);
+    }
 }
