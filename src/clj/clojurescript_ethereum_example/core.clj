@@ -12,12 +12,19 @@
 (def ^:dynamic *server*)
 
 (defroutes routes
+
+  (resources "/browser-solidity/" {:root "browser-solidity"})
+  (comment
+    (GET "/browser-solidity/" _
+         {:status  200
+          :headers {"Content-Type" "text/html; charset=utf-8"}
+          :body    (io/input-stream (io/resource "browser-solidity/index.html"))}) )
   (GET "/js/*" _
-    {:status 404})
-  (GET "/*" _
-    {:status 200
-     :headers {"Content-Type" "text/html; charset=utf-8"}
-     :body (io/input-stream (io/resource "public/index.html"))}))
+       {:status 404})
+  (GET "/" _
+       {:status  200
+        :headers {"Content-Type" "text/html; charset=utf-8"}
+        :body    (io/input-stream (io/resource "public/index.html"))}) )
 
 (def http-handler
   (-> routes
