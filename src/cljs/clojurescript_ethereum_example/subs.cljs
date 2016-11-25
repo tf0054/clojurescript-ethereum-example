@@ -40,3 +40,12 @@
  :db/tweetsNum
  (fn [db]
    (:tweetsNum db)))
+
+(reg-sub
+ :db/contractAddr
+ (fn [db]
+   (println "contractAddr")
+   (:address (:contract db))
+   (get-in db [:contract :address])
+   ;; (:contractAddr db)
+   ))

@@ -221,3 +221,13 @@
  interceptors
  (fn [db [x]]
    (assoc db :tweetsNum (.toNumber x))))
+
+(reg-event-db
+ :ui/cAddrUpdate
+ interceptors
+ (fn [db [x]]
+   (console :log "hendler:ui/cAddrUpdate" (get-in db [:contract :address])
+            "->" x)
+   (assoc-in db [:contract :address] x)
+   ))
+

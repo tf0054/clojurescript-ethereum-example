@@ -11,7 +11,8 @@
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
 
 (defn new-tweet-component []
-  (let [settings     (subscribe [:db/settings])
+  (let [contractAddr (subscribe [:db/contractAddr])
+        settings     (subscribe [:db/settings])
         new-tweet    (subscribe [:db/new-tweet])
         my-addresses (subscribe [:db/my-addresses])
         balance      (subscribe [:new-tweet/selected-address-balance])]
@@ -39,7 +40,17 @@
           [:new-tweet/update :address]]
          [:br]
          [:h3 "Balance: " (u/eth @balance)]
+         ;;[:br]
+
+         [ui/text-field {:default-value       (:text @contractAddr)
+                         :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
+                         :name                "ContractAddr"
+                         ;; :max-length       (:max-tweet-length @settings)
+                         :floating-label-text "Where is your contract at?"
+                         :style               {:width "100%"}}]
          [:br]
+         [:h3 "Current contract address: " (:text @contractAddr)]
+         
          [ui/raised-button
           {:secondary    true
            :disabled     (or (empty? (:text @new-tweet))
