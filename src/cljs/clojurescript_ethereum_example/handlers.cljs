@@ -1,17 +1,17 @@
 (ns clojurescript-ethereum-example.handlers
   (:require
-    [ajax.core :as ajax]
-    [cljs-web3.core :as web3]
-    [cljs-web3.eth :as web3-eth]
-    [cljs-web3.personal :as web3-personal]
-    [cljsjs.web3]
-    [clojurescript-ethereum-example.db :as db]
-    [day8.re-frame.http-fx]
-    [goog.string :as gstring]
-    [goog.string.format]
-    [madvas.re-frame.web3-fx]
-    [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
-    [clojurescript-ethereum-example.utils :as u]))
+   [ajax.core :as ajax]
+   [cljs-web3.core :as web3]
+   [cljs-web3.eth :as web3-eth]
+   [cljs-web3.personal :as web3-personal]
+   [cljsjs.web3]
+   [clojurescript-ethereum-example.db :as db]
+   [day8.re-frame.http-fx]
+   [goog.string :as gstring]
+   [goog.string.format]
+   [madvas.re-frame.web3-fx]
+   [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
+   [clojurescript-ethereum-example.utils :as u]))
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])
@@ -36,37 +36,39 @@
         :fns  [[web3-eth/accounts :blockchain/my-addresses-loaded :log-error]]}}))))
 
 (reg-event-fx
-  :blockchain/my-addresses-loaded
-  interceptors
-  (fn [{:keys [db]} [addresses]]
-    {:db (-> db
-           (assoc :my-addresses addresses)
-           (assoc-in [:new-tweet :address] (first addresses)))
-     :web3-fx.blockchain/balances
-     {:web3 (:web3 db/default-db)
-      :addresses addresses
-      :watch? true
-      :blockchain-filter-opts "latest"
-      :dispatches [:blockchain/balance-loaded :log-error]}}))
+ :blockchain/my-addresses-loaded
+ interceptors
+ (fn [{:keys [db]} [addresses]]
+   {:db (-> db
+            (assoc :my-addresses addresses)
+            (assoc-in [:new-tweet :address] (first addresses)))
+    :web3-fx.blockchain/balances
+    {:web3                   (:web3 db/default-db)
+     :addresses              addresses
+     :watch?                 true
+     :blockchain-filter-opts "latest"
+     :dispatches             [:blockchain/balance-loaded :log-error]}}))
 
 (reg-event-fx
-  :contract/abi-loaded
-  interceptors
-  (fn [{:keys [db]} [abi]]
-    (let [web3 (:web3 db)
-          contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))]
+ :contract/abi-loaded
+ interceptors
+ (fn [{:keys [db]} [abi]]
+   (let [web3              (:web3 db)
+         contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
+         db                (-> db
+                               (assoc-in [:contract :abi] abi)
+                               (assoc-in [:contract :instance] contract-instance)     
+                               )] 
+     {:db db
+      :web3-fx.contract/events
+      {:instance contract-instance
+       :db       db
+       :db-path  [:contract :events]
+       :events   [[:on-tweet-added {} {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
-      {:db (assoc-in db [:contract :instance] contract-instance)
-
-       :web3-fx.contract/events
-       {:instance contract-instance
-        :db db
-        :db-path [:contract :events]
-        :events [[:on-tweet-added {} {:from-block 0} :contract/on-tweet-loaded :log-error]]}
-
-       :web3-fx.contract/constant-fns
-       {:instance contract-instance
-        :fns [[:get-settings :contract/settings-loaded :log-error]]}})))
+      :web3-fx.contract/constant-fns
+      {:instance contract-instance
+       :fns      [[:get-settings :contract/settings-loaded :log-error]]}})))
 
 (reg-event-db
  :contract/on-tweet-loaded
@@ -77,11 +79,11 @@
                                    :tweet-key (.toNumber (:tweet-key tweet))}))))
 
 (reg-event-db
-  :contract/settings-loaded
-  interceptors
-  (fn [db [[max-name-length max-tweet-length]]]
-    (assoc db :settings {:max-name-length (.toNumber max-name-length)
-                         :max-tweet-length (.toNumber max-tweet-length)})))
+ :contract/settings-loaded
+ interceptors
+ (fn [db [[max-name-length max-tweet-length]]]
+   (assoc db :settings {:max-name-length  (.toNumber max-name-length)
+                        :max-tweet-length (.toNumber max-tweet-length)})))
 
 (reg-event-db
  :blockchain/balance-loaded
@@ -120,36 +122,36 @@
    ))
 
 (reg-event-db
-  :new-tweet/transaction-receipt-loaded
-  interceptors
-  (fn [db [{:keys [gas-used] :as transaction-receipt}]]
-    (console :log transaction-receipt)
-    (when (= gas-used tweet-gas-limit)
-      (console :error "All gas used"))
-    (assoc-in db [:new-tweet :sending?] false)))
+ :new-tweet/transaction-receipt-loaded
+ interceptors
+ (fn [db [{:keys [gas-used] :as transaction-receipt}]]
+   (console :log transaction-receipt)
+   (when (= gas-used tweet-gas-limit)
+     (console :error "All gas used"))
+   (assoc-in db [:new-tweet :sending?] false)))
 
 (reg-event-fx
-  :contract/fetch-compiled-code
-  interceptors
-  (fn [{:keys [db]} [on-success]]
-    {:http-xhrio {:method :get
-                  :uri (gstring/format "/contracts/build/%s.json"
-                                       (get-in db [:contract :name]))
-                  :timeout 6000
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success on-success
-                  :on-failure [:log-error]}}))
+ :contract/fetch-compiled-code
+ interceptors
+ (fn [{:keys [db]} [on-success]]
+   {:http-xhrio {:method          :get
+                 :uri             (gstring/format "/contracts/build/%s.json"
+                                                  (get-in db [:contract :name]))
+                 :timeout         6000
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success      on-success
+                 :on-failure      [:log-error]}}))
 
 (reg-event-fx
-  :contract/deploy-compiled-code
-  interceptors
-  (fn [{:keys [db]} [contracts]]
-    (let [{:keys [abi bin]} (get-in contracts [:contracts (keyword (:name (:contract db)))])]
-      {:web3-fx.blockchain/fns
-       {:web3 (:web3 db)
-        :fns [[web3-eth/contract-new
+ :contract/deploy-compiled-code
+ interceptors
+ (fn [{:keys [db]} [contracts]]
+   (let [{:keys [abi bin]} (get-in contracts [:contracts (keyword (:name (:contract db)))])]
+     {:web3-fx.blockchain/fns
+      {:web3 (:web3 db)
+       :fns  [[web3-eth/contract-new
                (js/JSON.parse abi)
-               {:gas 4500000
+               {:gas  4500000
                 :data bin
                 :from (first (:my-addresses db))}
                :contract/deployed
@@ -166,11 +168,11 @@
              :log-error]]}}))
 
 (reg-event-fx
-  :blockchain/account-unlocked
-  interceptors
-  (fn [{:keys [db]}]
-    (console :log "Account was unlocked.")
-    {}))
+ :blockchain/account-unlocked
+ interceptors
+ (fn [{:keys [db]}]
+   (console :log "Account was unlocked.")
+   {}))
 
 (reg-event-fx
  :contract/deployed
@@ -231,3 +233,15 @@
    (assoc-in db [:contract :address] x)
    ))
 
+(reg-event-fx
+ :ui/cInstUpdate
+ interceptors
+ (fn [{:keys [db]} []]
+   (console :log "hendler:ui/cInstUpdate" (get-in db [:contract :address]))
+   (let [abi               (get-in db [:contract :abi])
+         web3              (:web3 db)
+         contract-instance (web3-eth/contract-at web3 abi (get-in db [:contract :address]))]
+     (println contract-instance)
+     {:db (assoc-in db [:contract :instance] contract-instance)}
+     )
+   ))
