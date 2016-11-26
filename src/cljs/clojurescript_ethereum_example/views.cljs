@@ -6,6 +6,7 @@
    [cljs-react-material-ui.reagent :as ui]
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
    [clojurescript-ethereum-example.v-twitter :as v_twitter]
+   [clojurescript-ethereum-example.v-dev :as v_dev]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
@@ -37,8 +38,7 @@
   )
 
 (defn main-panel []
-  (let [page (subscribe [:db/page])
-        num  (subscribe [:db/tweetsNum])]
+  (let [page (subscribe [:db/page])]
     (fn []
       [ui/mui-theme-provider
        {:mui-theme (get-mui-theme {:palette {:primary1-color (color :light-blue500)
@@ -57,14 +57,8 @@
          ]
         ;; development
         [:div (display @page 1)
-         @num
-         [:br]
-         [ui/raised-button
-          {:secondary    true
-           :label        "getTweetsNum"
-           :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:tf0054/getTweetsNum])
-           }]
+         [v_dev/new-dev-component0]
+         [v_dev/new-dev-component1]
          ]
         ]])))
 

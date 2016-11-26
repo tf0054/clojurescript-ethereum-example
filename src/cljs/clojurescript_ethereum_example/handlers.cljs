@@ -107,8 +107,9 @@
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
        :fn       [:add-tweet name text
-                  {:from address
-                   :gas  tweet-gas-limit}
+                  {:value 1000000
+                   :from  address
+                   :gas   tweet-gas-limit}
                   :new-tweet/confirmed
                   :log-error
                   :new-tweet/transaction-receipt-loaded]}})))
@@ -238,10 +239,35 @@
  interceptors
  (fn [{:keys [db]} []]
    (console :log "hendler:ui/cInstUpdate" (get-in db [:contract :address]))
-   (let [abi               (get-in db [:contract :abi])
-         web3              (:web3 db)
-         contract-instance (web3-eth/contract-at web3 abi (get-in db [:contract :address]))]
-     (println contract-instance)
-     {:db (assoc-in db [:contract :instance] contract-instance)}
+   (let [abi       (get-in db [:contract :abi])
+         web3      (:web3 db)
+         addr      (get-in db [:contract :address])
+         cinstance (web3-eth/contract-at web3 abi addr)]
+     (println cinstance)
+     {:db (assoc-in db [:contract :instance] cinstance)}
      )
    ))
+
+(reg-event-db
+ :ui/AAupdate
+ interceptors
+ (fn [db [value]]
+   (assoc-in db [:dev :address] value)))
+
+(reg-event-db
+ :ui/amountNum
+ interceptors
+ (fn [db [[x updated]]]
+   (console :log "hendler:ui/amountNum" x updated)
+   (assoc-in db [:dev :amount] (.toNumber x))))
+
+(reg-event-fx
+ :tf0054/getAmount
+ interceptors
+ (fn [{:keys [db]} [x]]
+   (let []
+     (console :log "hendler:ui/getAmount")
+     {:web3-fx.contract/constant-fns
+      {:instance (:instance (:contract db))
+       :fns      [[:get-amount x
+                   :ui/amountNum :log-error]]}})))

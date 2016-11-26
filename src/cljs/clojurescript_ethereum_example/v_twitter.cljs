@@ -11,7 +11,8 @@
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
 
 (defn new-tweet-component []
-  (let [caddr        (subscribe [:db/contractAddr])
+  (let [abi          (subscribe [:db/contractAbi])
+        caddr        (subscribe [:db/contractAddr])
         settings     (subscribe [:db/settings])
         new-tweet    (subscribe [:db/new-tweet])
         my-addresses (subscribe [:db/my-addresses])
@@ -58,7 +59,8 @@
            ;;                   (:sending? @new-tweet))
            :label        "Update addr"
            :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:ui/cInstUpdate])
+           :on-touch-tap ;; # (dispatch [:ui/cInstUpdate])
+           #(dispatch [:contract/abi-loaded @abi])
            }]
          [ui/raised-button
           {:secondary    true

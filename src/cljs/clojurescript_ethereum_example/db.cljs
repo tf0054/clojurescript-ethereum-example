@@ -27,4 +27,8 @@
                     }
    :page           0
    :tweetsNum      0
+   :dev            {:address nil
+                    :amount  0
+                    }
+
    })

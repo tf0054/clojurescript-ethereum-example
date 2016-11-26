@@ -44,7 +44,23 @@
 (reg-sub
  :db/contractAddr
  (fn [db]
-   ;; (println "contractAddr" (:address (:contract db)))
-   ;; (:address (:contract db))
    (get-in db [:contract :address])
+   ))
+
+(reg-sub
+ :db/contractAbi
+ (fn [db]
+   (get-in db [:contract :abi])
+   ))
+
+(reg-sub
+ :db/devAddr
+ (fn [db]
+   (get-in db [:dev :address])
+   ))
+
+(reg-sub
+ :db/devAmount
+ (fn [db]
+   (get-in db [:dev :amount])
    ))
