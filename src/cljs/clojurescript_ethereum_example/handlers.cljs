@@ -57,7 +57,8 @@
          contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
          db                (-> db
                                (assoc-in [:contract :abi] abi)
-                               (assoc-in [:contract :instance] contract-instance)     
+                               (assoc-in [:contract :instance] contract-instance)
+                               (assoc-in [:tweets] nil)
                                )] 
      {:db db
       :web3-fx.contract/events
@@ -74,6 +75,7 @@
  :contract/on-tweet-loaded
  interceptors
  (fn [db [tweet]]
+   (console :log "contract/on-tweet-loaded")
    (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
                                   {:date      (u/big-number->date-time (:date tweet))
                                    :tweet-key (.toNumber (:tweet-key tweet))}))))
@@ -107,9 +109,9 @@
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
        :fn       [:add-tweet name text
-                  {:value 1000000
-                   :from  address
-                   :gas   tweet-gas-limit}
+                  {;; :value (web3/to-wei 0.02 "ether")
+                   :from address
+                   :gas  tweet-gas-limit}
                   :new-tweet/confirmed
                   :log-error
                   :new-tweet/transaction-receipt-loaded]}})))
@@ -223,6 +225,7 @@
  :ui/tweetsNum
  interceptors
  (fn [db [x]]
+   (console :log "hendler:ui/tweetsNum" x)
    (assoc db :tweetsNum (.toNumber x))))
 
 (reg-event-db
@@ -257,8 +260,8 @@
 (reg-event-db
  :ui/amountNum
  interceptors
- (fn [db [[x updated]]]
-   (console :log "hendler:ui/amountNum" x updated)
+ (fn [db [x]]
+   (console :log "hendler:ui/amountNum" x)
    (assoc-in db [:dev :amount] (.toNumber x))))
 
 (reg-event-fx
@@ -269,5 +272,5 @@
      (console :log "hendler:ui/getAmount")
      {:web3-fx.contract/constant-fns
       {:instance (:instance (:contract db))
-       :fns      [[:get-amount x
+       :fns      [[:get-Balance x
                    :ui/amountNum :log-error]]}})))
