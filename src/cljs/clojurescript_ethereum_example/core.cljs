@@ -22,3 +22,6 @@
 (defn ^:export init []
   (re-frame/dispatch-sync [:initialize])
   (mount-root))
+
+;; Contracts
+;; https://gist.github.com/anonymous/8a316ba2cb8b41333599ba7b010d41ff
