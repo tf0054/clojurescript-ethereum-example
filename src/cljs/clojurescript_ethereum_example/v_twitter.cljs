@@ -25,7 +25,7 @@
                          :on-change           #(dispatch [:new-tweet/update :name (u/evt-val %)])
                          :name                "name"
                          :max-length          (:max-name-length @settings)
-                         :floating-label-text "Your Name"
+                         :floating-label-text "Recipient address"
                          :style               {:width "70%"}}]
          [:br]
          [ui/text-field {:default-value       (:text @new-tweet)
