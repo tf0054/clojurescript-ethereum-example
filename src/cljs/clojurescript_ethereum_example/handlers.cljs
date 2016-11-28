@@ -18,7 +18,7 @@
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])
 
-(def tweet-gas-limit 1000000)
+(def tweet-gas-limit 2000000)
 
 (reg-event-fx
  :initialize
@@ -55,6 +55,7 @@
  :contract/abi-loaded
  interceptors
  (fn [{:keys [db]} [abi]]
+   (console :log "abi-loaded:" (get-in db [:contract :address]))
    (let [web3              (:web3 db)
          contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
          db                (-> db
@@ -63,11 +64,22 @@
                                (assoc-in [:tweets] nil)
                                )] 
      {:db db
+      ;; :web3-fx.contract/events
+      ;; {:instance contract-instance
+      ;;  :db       db
+      ;;  :db-path  [:contract :events]
+      ;;  :events   [[:on-tweet-added
+      ;;              {}
+      ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
+
       :web3-fx.contract/events
       {:instance contract-instance
        :db       db
-       :db-path  [:contract :events]
-       :events   [[:on-tweet-added {} {:from-block 0} :contract/on-tweet-loaded :log-error]]}
+       :db-path  [:contract :events2]
+       :events   [[:on-tweet-added ;; definition name
+                   {:indexed-addr (get-in db [:new-tweet :address])}
+                   ;;{}
+                   {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
       :web3-fx.contract/constant-fns
       {:instance contract-instance
@@ -77,7 +89,7 @@
  :contract/on-tweet-loaded
  interceptors
  (fn [db [tweet]]
-   (console :log "contract/on-tweet-loaded")
+   (console :log "contract/on-tweet-loaded:" tweet)
    (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
                                   {:date      (u/big-number->date-time (:date tweet))
                                    :tweet-key (.toNumber (:tweet-key tweet))}))))
@@ -105,6 +117,8 @@
  :new-tweet/send
  interceptors
  (fn [{:keys [db]} []]
+   (console :log "Send tweet to a contract at"
+            (get-in db [:contract :address]))
    (let [{:keys [name text address]} (:new-tweet db)]
      {:web3-fx.contract/state-fn
       {:instance (:instance (:contract db))
@@ -286,3 +300,13 @@
       {:instance (:instance (:contract db))
        :fns      [[:get-Balance x
                    :ui/amountNum :log-error]]}})))
+
+(reg-event-db
+ :contract/filtered-tweet-loaded
+ interceptors
+ (fn [db [tweet]]
+   (console :log "contract/on-tweet-loaded:" tweet)
+   (update db :filteredtweets conj
+           (merge (select-keys tweet [:author-address :text :name])
+                  {:date      (u/big-number->date-time (:date tweet))
+                   :tweet-key (.toNumber (:tweet-key tweet))}))))

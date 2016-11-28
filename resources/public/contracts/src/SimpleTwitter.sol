@@ -31,7 +31,9 @@ contract SimpleTwitter {
 
     //Tweet[] public tweets;
 
-    event onTweetAdded(address authorAddress, string name, string text, uint date, uint tweetKey);
+    event onTweetAdded(address authorAddress,
+        address indexed indexedAddr,
+        string name, string text, uint date, uint tweetKey);
 
     modifier onlyDeveloper() {
         if (msg.sender != developer) throw;
@@ -58,15 +60,18 @@ contract SimpleTwitter {
             }
     }
     
+    bytes32 bname;
     string ctweet;
     function addTweet(string name, string text) {
         if (name.toSlice().len() > maxNameLength) throw;
         if (text.toSlice().len() > maxTweetLength) throw;
         
         ctweet = chkBalance(msg.sender, text);
-        
         //tweets.push(Tweet(msg.sender, now));
-        onTweetAdded(msg.sender, name, ctweet, now, idxTweets++);
+        onTweetAdded(msg.sender,
+        msg.sender,
+        //utils.parseAddr(name),
+        name, ctweet, now, idxTweets++);
     }
 
     function getSettings() constant returns(uint16, uint16) {
@@ -85,6 +90,10 @@ contract SimpleTwitter {
     
     function getBalance(string x) constant returns(uint) {
         return balances[x];
+    }
+    
+    function getAddr(string name) returns (address){
+        return  utils.parseAddr(name);
     }
     
 }

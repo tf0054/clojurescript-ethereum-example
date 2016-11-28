@@ -3,6 +3,7 @@
 
 (def default-db
   {:tweets         []
+   :filteredTweets []
    :settings       {}
    :my-addresses   []
    :accounts       {}
