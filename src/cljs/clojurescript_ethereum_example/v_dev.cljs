@@ -5,6 +5,7 @@
    [clojurescript-ethereum-example.address-select-field :refer [address-select-field]]
    [cljs-react-material-ui.reagent :as ui]
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
+   [io.github.theasp.simple-encryption :as se]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
@@ -31,6 +32,7 @@
 (defn dev-component1 []
   (let [aaddr   (subscribe [:db/devAddr])
         aamount (subscribe [:db/devAmount])
+        enc     (subscribe [:db/devEnc])
         ]
     (fn []
       [row
@@ -41,6 +43,8 @@
                          :name                "addr"
                          :floating-label-text "Who's amount is interested?"
                          :style               {:width "70%"}}]
+         [:br]
+         [:h3 "Enc: " @enc]
          [:br]
          [ui/raised-button
           {:secondary    true

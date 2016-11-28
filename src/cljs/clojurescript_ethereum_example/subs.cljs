@@ -1,20 +1,22 @@
 (ns clojurescript-ethereum-example.subs
-  (:require [re-frame.core :refer [reg-sub]]))
+  (:require
+   [re-frame.core :refer [reg-sub]]
+   ) ) 
 
 (reg-sub
-  :db/my-addresses
-  (fn [db]
-    (:my-addresses db)))
+ :db/my-addresses
+ (fn [db]
+   (:my-addresses db)))
 
 (reg-sub
-  :db/tweets
-  (fn [db]
-    (sort-by :date #(compare %2 %1) (:tweets db))))
+ :db/tweets
+ (fn [db]
+   (sort-by :date #(compare %2 %1) (:tweets db))))
 
 (reg-sub
-  :db/new-tweet
-  (fn [db]
-    (:new-tweet db)))
+ :db/new-tweet
+ (fn [db]
+   (:new-tweet db)))
 
 (reg-sub
   :db/settings
@@ -62,5 +64,11 @@
 (reg-sub
  :db/devAmount
  (fn [db]
-   (get-in db [:dev :amount])
+   (get-in db [:dev :amount]) 
+   ))
+
+(reg-sub
+ :db/devEnc
+ (fn [db]
+   (get-in db [:dev :enc]) 
    ))

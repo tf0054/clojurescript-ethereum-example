@@ -11,7 +11,9 @@
    [goog.string.format]
    [madvas.re-frame.web3-fx]
    [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
-   [clojurescript-ethereum-example.utils :as u]))
+   [clojurescript-ethereum-example.utils :as u]
+   )
+  )
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])
@@ -255,7 +257,17 @@
  :ui/AAupdate
  interceptors
  (fn [db [value]]
-   (assoc-in db [:dev :address] value)))
+   (let [encStr (u/getEncrypted (get-in db [:new-tweet :address]) value)]
+     (-> db
+         (assoc-in [:dev :address] value)
+         (assoc-in [:dev :enc] (str
+                                encStr "^ "
+                                (u/getDecrypted
+                                 ;;(get-in db [:new-tweet :address])
+                                 "tf0054"
+                                 encStr) "^ "
+                                (get-in db [:new-tweet :address])
+                                ))))))
 
 (reg-event-db
  :ui/amountNum
