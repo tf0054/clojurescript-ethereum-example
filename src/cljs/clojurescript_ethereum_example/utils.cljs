@@ -2,7 +2,11 @@
   (:require [cljs-time.coerce :refer [to-date-time to-long to-local-date-time]]
             [cljs-time.core :refer [date-time to-default-time-zone]]
             [cljs-time.format :as time-format]
-            [cljs-web3.core :as web3]))
+            [cljs-web3.core :as web3]
+            [io.github.theasp.simple-encryption :as se]
+            [goog.crypt.base64 :as b64]
+            [cljs.reader :as reader]
+            ))
 
 (defn truncate
   "Truncate a string with suffix (ellipsis by default) if it is
@@ -27,3 +31,20 @@
 
 (defn format-date [date]
   (time-format/unparse-local (time-format/formatters :rfc822) (to-default-time-zone (to-date-time date))))
+
+(defn- getFakeEnc [enc]
+  (b64/encodeString (pr-str enc))
+  )
+
+(defn- getFakeDec [dec]
+  (reader/read-string (b64/decodeString dec))  
+  )
+
+(defn getEncrypted [key value] 
+  (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
+    (getFakeEnc (se/encrypt-with kdf value
+                                 {:kdf-iterations 9000}))))
+
+(defn getDecrypted [key evalue] 
+  (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
+    (se/decrypt-with kdf (getFakeDec evalue))))

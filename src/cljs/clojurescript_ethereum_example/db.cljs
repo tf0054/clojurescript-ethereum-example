@@ -29,6 +29,7 @@
    :tweetsNum      0
    :dev            {:address nil
                     :amount  0
+                    :enc     nil
                     }
 
    })
