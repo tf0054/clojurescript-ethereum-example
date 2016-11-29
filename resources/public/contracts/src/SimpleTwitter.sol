@@ -51,27 +51,36 @@ contract SimpleTwitter {
         return(s1.toSlice().concat(s2.toSlice()));
     }
     
-    function chkBalance(address x, string y) returns(string){
-        tmp = utils.toString(msg.sender);
-        if(getBalance(concat("0x", tmp)) > 0){
-                return (concat(concat(concat(y," (PAYED: "), tmp), " )"));
-            }else{
-                return (y);
-            }
-    }
+    //function chkBalance(address x, string y) returns(string){
+    //    tmp = utils.toString(msg.sender);
+    //    if(getBalance(concat("0x", tmp)) > 0){
+    //            return (concat(concat(concat(y," (PAYED: "), tmp), " )"));
+    //        }else{
+    //            return (y);
+    //        }
+    //}
     
-    bytes32 bname;
-    string ctweet;
+    //string ctweet;
     function addTweet(string name, string text) {
-        if (name.toSlice().len() > maxNameLength) throw;
-        if (text.toSlice().len() > maxTweetLength) throw;
+        //if (name.toSlice().len() > maxNameLength) throw;
+        //if (text.toSlice().len() > maxTweetLength) throw;
         
-        ctweet = chkBalance(msg.sender, text);
-        //tweets.push(Tweet(msg.sender, now));
-        onTweetAdded(msg.sender,
-        msg.sender,
-        //utils.parseAddr(name),
-        name, ctweet, now, idxTweets++);
+        //ctweet = chkBalance(msg.sender, text);
+        if (name.toSlice().len() != 42) {
+            onTweetAdded(msg.sender,
+                msg.sender, // OK
+                name, text, now, idxTweets++);
+        } else {
+            if (getBalance(name) > 0){
+                onTweetAdded(msg.sender,
+                    utils.parseAddr(name),
+                    name, concat("FOUND(PAYED)!: ", text), now, idxTweets++);
+            } else {
+                onTweetAdded(msg.sender,
+                    utils.parseAddr(name),
+                    name, concat("FOUND!: ", text), now, idxTweets++);
+            }
+        }
     }
 
     function getSettings() constant returns(uint16, uint16) {
@@ -90,10 +99,6 @@ contract SimpleTwitter {
     
     function getBalance(string x) constant returns(uint) {
         return balances[x];
-    }
-    
-    function getAddr(string name) returns (address){
-        return  utils.parseAddr(name);
     }
     
 }

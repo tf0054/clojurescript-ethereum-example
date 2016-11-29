@@ -1,5 +1,6 @@
 (ns clojurescript-ethereum-example.handlers
   (:require
+   [clojure.string :as str]
    [ajax.core :as ajax]
    [cljs-web3.core :as web3]
    [cljs-web3.eth :as web3-eth]
@@ -124,7 +125,7 @@
       {:instance (:instance (:contract db))
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
-       :fn       [:add-tweet name text
+       :fn       [:add-tweet (str/lower-case (str/lower-case name)) text
                   {;; :value (web3/to-wei 0.02 "ether")
                    :from address
                    :gas  tweet-gas-limit}
@@ -271,17 +272,21 @@
  :ui/AAupdate
  interceptors
  (fn [db [value]]
-   (let [encStr (u/getEncrypted (get-in db [:new-tweet :address]) value)]
+   (let [val (str/lower-case (str/lower-case value))
+         ;; encStr (u/getEncrypted (get-in db [:new-tweet :address]) value)
+         ]
      (-> db
-         (assoc-in [:dev :address] value)
-         (assoc-in [:dev :enc] (str
-                                encStr "^ "
-                                (u/getDecrypted
-                                 ;;(get-in db [:new-tweet :address])
-                                 "tf0054"
-                                 encStr) "^ "
-                                (get-in db [:new-tweet :address])
-                                ))))))
+         (assoc-in [:dev :address] val)
+         (assoc-in [:dev :enc]
+                   val
+                   ;; (str encStr "^ "
+                   ;;      (u/getDecrypted
+                   ;;       ;;(get-in db [:new-tweet :address])
+                   ;;       "tf0054"
+                   ;;       encStr) "^ "
+                   ;;      (get-in db [:new-tweet :address])
+                   ;;      )
+                   )))))
 
 (reg-event-db
  :ui/amountNum

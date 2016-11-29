@@ -1,5 +1,6 @@
 (ns clojurescript-ethereum-example.subs
   (:require
+   [clojure.string :as str]
    [re-frame.core :refer [reg-sub]]
    ) ) 
 

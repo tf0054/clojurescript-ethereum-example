@@ -1,5 +1,6 @@
 (ns clojurescript-ethereum-example.v-dev
   (:require
+   [clojure.string :as str]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
    [clojurescript-ethereum-example.address-select-field :refer [address-select-field]]
@@ -44,7 +45,7 @@
                          :floating-label-text "Who's amount is interested?"
                          :style               {:width "70%"}}]
          [:br]
-         [:h3 "Enc: " @enc]
+         [:h3 "ENC/OUT: \"" @enc "\""]
          [:br]
          [ui/raised-button
           {:secondary    true
