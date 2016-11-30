@@ -7,6 +7,7 @@
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
    [clojurescript-ethereum-example.v-twitter :as v_twitter]
    [clojurescript-ethereum-example.v-dev :as v_dev]
+   [clojurescript-ethereum-example.v-list :as v_list]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
@@ -25,6 +26,9 @@
        [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 0])
                                      (dispatch [:ui/drawer]))} "default"]
+       [ui/menu-item {:onTouchTap #(do
+                                     (dispatch [:ui/page 2])
+                                     (dispatch [:ui/drawer]))} "list"]
        ]
       )
     )
@@ -60,5 +64,11 @@
          [v_dev/dev-component0]
          [v_dev/dev-component1]
          ]
+        ;; list
+        [:div (display @page 2)
+         [v_list/enquery-component]
+         [v_list/list-component] 
+         ]
+
         ]])))
 

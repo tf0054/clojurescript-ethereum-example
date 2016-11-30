@@ -62,8 +62,7 @@
          db                (-> db
                                (assoc-in [:contract :abi] abi)
                                (assoc-in [:contract :instance] contract-instance)
-                               (assoc-in [:tweets] nil)
-                               )] 
+                               (assoc-in [:tweets] nil))]
      {:db db
       ;; :web3-fx.contract/events
       ;; {:instance contract-instance
@@ -214,9 +213,7 @@
    (console :log "hendler:ui/drawer" (get-in db [:drawer :open]))
    (if (get-in db [:drawer :open])
      (assoc-in db [:drawer :open] false)
-     (assoc-in db [:drawer :open] true) )
-   ;;{:db db}
-   ;;db
+     (assoc-in db [:drawer :open] true) )   
    ))
 
 (reg-event-db
@@ -315,3 +312,65 @@
            (merge (select-keys tweet [:author-address :text :name])
                   {:date      (u/big-number->date-time (:date tweet))
                    :tweet-key (.toNumber (:tweet-key tweet))}))))
+
+(reg-event-db
+ :ui/enquery
+ (fn [db [_ id name price dealer]]
+   (console :log "hendler:ui/enquery" (get-in db [:enquery :open]) id name price dealer)
+   (-> db
+       (assoc-in [:enquery :open] true)
+       (assoc-in [:enquery :id] id)
+       (assoc-in [:enquery :name] name)
+       (assoc-in [:enquery :price] price)
+       (assoc-in [:enquery :dealer] dealer))
+   ))
+
+(reg-event-db
+ :enquery/update
+ interceptors
+ (fn [db [value]]
+   (assoc-in db [:enquery :text] value)))
+
+(reg-event-fx
+ :enquery/send
+ interceptors
+ (fn [{:keys [db]} []]
+   (console :log "handler:enquery/send"
+            (get-in db [:enquery :id]))
+   (let [address (get-in db [:new-tweet :address])
+         json    (clj->js (dissoc (:enquery db) :open :lead-text))
+         strEnc  (u/getEncrypted "KEY" json)]
+     ;; a json with id.. would be a encrypted sencente. 
+     (console :log "sending data:" json "->" strEnc)
+     ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
+     {:db (assoc-in db [:enquery :open] false)
+      :web3-fx.contract/state-fn
+      {:instance (:instance (:contract db))
+       :web3     (:web3 db)
+       :db-path  [:contract :send-tweet]
+       :fn       [:add-tweet (str/lower-case (get-in db [:enquery :dealer])) strEnc
+                  {:from address
+                   :gas  tweet-gas-limit}
+                  :enquery/received
+                  :log-error
+                  :enquery/transaction-receipt-loaded]}
+      }
+     )))
+
+(reg-event-db
+ :enquery/received
+ interceptors
+ (fn [db [transaction-hash]]
+   (console :log "Enquery was confirmed! on" transaction-hash)
+   (assoc-in db [:enquery :text] "")
+   ))
+
+(reg-event-db
+ :enquery/transaction-receipt-loaded
+ interceptors
+ (fn [db [{:keys [gas-used] :as transaction-receipt}]]
+   (console :log "Enquery was mined! like" transaction-receipt) 
+   (when (= gas-used tweet-gas-limit)
+     (console :error "All gas used"))
+   ;;(assoc-in db [:new-tweet :sending?] false)
+   ))

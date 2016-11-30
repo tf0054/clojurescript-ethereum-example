@@ -73,3 +73,15 @@
  (fn [db]
    (get-in db [:dev :enc]) 
    ))
+
+(reg-sub
+ :db/cars
+ (fn [db]
+   (:cars db)))
+
+
+(reg-sub
+ :db/enquery
+ (fn [db]
+   (:enquery db)))
+

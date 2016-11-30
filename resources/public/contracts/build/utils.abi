@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"name":"b","type":"bytes1"}],"name":"char","outputs":[{"name":"c","type":"bytes1"}],"payable":false,"type":"function"}]

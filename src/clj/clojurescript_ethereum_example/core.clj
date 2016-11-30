@@ -14,6 +14,8 @@
 (defroutes routes
 
   (resources "/browser-solidity/" {:root "browser-solidity"})
+  
+  (resources "/images/" {:root "images"})
 
   (GET "/js/*" _
        {:status 404})
