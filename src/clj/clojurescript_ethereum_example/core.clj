@@ -6,10 +6,19 @@
             [ring.middleware.gzip :refer [wrap-gzip]]
             [ring.middleware.logger :refer [wrap-with-logger]]
             [environ.core :refer [env]]
+            [cheshire.core :as json]
             [org.httpkit.server :refer [run-server]])
   (:gen-class))
 
 (def ^:dynamic *server*)
+
+(def dealers {"dealer01" {:name    "DEALER_A"
+                          :address "0x1"
+                          :key     "01dealer"}
+              "dealer02" {:name    "DEALER_B"
+                          :address "0x2"
+                          :key     "02dealer"}
+              })
 
 (defroutes routes
 
@@ -17,6 +26,27 @@
   
   (resources "/images/" {:root "images"})
 
+  ;; DEALER KEY
+  (GET "/key/:id/:num" [id num];; "/dealers/" isnt dealt with.
+       {:status  200
+        :headers {"Content-Type" "text/html; charset=utf-8"}
+        :body    (json/generate-string
+                  (if (nil? (and id (get dealers id)))
+                    {}
+                    (dissoc (get dealers id) :name :address)))
+        })
+  
+  ;; DEALER INFO
+  (GET "/dealers/:id" [id];; "/dealers/" isnt dealt with.
+       (println "dealers: " id)
+       {:status  200
+        :headers {"Content-Type" "text/html; charset=utf-8"}
+        :body    (json/generate-string
+                  (if (nil? (and id (get dealers id)))
+                    {}
+                    (get dealers id)))
+        })
+  
   (GET "/js/*" _
        {:status 404})
   (GET "/" _

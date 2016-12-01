@@ -11,6 +11,7 @@
                  [day8.re-frame/http-fx "0.0.4"]
                  [environ "1.0.3"]
                  [http-kit "2.2.0"]
+                 [cheshire "5.6.3"]
                  [madvas.re-frame/web3-fx "0.1.0"]
                  [medley "0.8.3"]
                  [org.clojure/clojure "1.8.0"]
