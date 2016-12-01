@@ -21,20 +21,20 @@
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
         [ui/paper {:style {:padding "0 20px 20px"}}
-         [ui/text-field {:default-value       (:name @new-tweet)
-                         :on-change           #(dispatch [:new-tweet/update :name (u/evt-val %)])
-                         :name                "name"
-                         ;; :max-length          (:max-name-length @settings)
-                         :floating-label-text "Recipient address (0x...)"
-                         :style               {:width "90%"}}]
-         [:br]
-         [ui/text-field {:default-value       (:text @new-tweet)
-                         :on-change           #(dispatch [:new-tweet/update :text (u/evt-val %)])
-                         :name                "tweet"
-                         :max-length          (:max-tweet-length @settings)
-                         :floating-label-text "What's happening?"
-                         :style               {:width "100%"}}]
-         [:br]
+         ;; [ui/text-field {:default-value       (:name @new-tweet)
+         ;;                 :on-change           #(dispatch [:new-tweet/update :name (u/evt-val %)])
+         ;;                 :name                "name"
+         ;;                 ;; :max-length          (:max-name-length @settings)
+         ;;                 :floating-label-text "Recipient address (0x...)"
+         ;;                 :style               {:width "90%"}}]
+         ;; [:br]
+         ;; [ui/text-field {:default-value       (:text @new-tweet)
+         ;;                 :on-change           #(dispatch [:new-tweet/update :text (u/evt-val %)])
+         ;;                 :name                "tweet"
+         ;;                 :max-length          (:max-tweet-length @settings)
+         ;;                 :floating-label-text "What's happening?"
+         ;;                 :style               {:width "100%"}}]
+         ;; [:br]
          [address-select-field
           @my-addresses
           (:address @new-tweet)
@@ -62,19 +62,21 @@
            :on-touch-tap ;; # (dispatch [:ui/cInstUpdate])
            #(dispatch [:contract/abi-loaded @abi])
            }]
-         [ui/raised-button
-          {:secondary    true
-           :disabled     (or (empty? (:text @new-tweet))
-                             (empty? (:name @new-tweet))
-                             (empty? (:address @new-tweet))
-                             (:sending? @new-tweet))
-           :label        "Tweet"
-           :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:new-tweet/send])
-           }]]]])))
+         ;; [ui/raised-button
+         ;;  {:secondary    true
+         ;;   :disabled     (or (empty? (:text @new-tweet))
+         ;;                     (empty? (:name @new-tweet))
+         ;;                     (empty? (:address @new-tweet))
+         ;;                     (:sending? @new-tweet))
+         ;;   :label        "Tweet"
+         ;;   :style        {:margin-top 15}
+         ;;   :on-touch-tap #(dispatch [:new-tweet/send])
+         ;;   }]]
+         ]]])))
 
 (defn tweets-component []
-  (let [tweets (subscribe [:db/tweets])]
+  (let [tweets  (subscribe [:db/tweets])
+        myaddrs (subscribe [:db/my-addresses])]
     (fn []
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
@@ -83,10 +85,16 @@
          (for [{:keys [tweet-key name text date author-address]} @tweets]
            [:div {:style {:margin-top 20}
                   :key   tweet-key}
-            [:h3 name]
             [:h5 (u/format-date date)]
+            [:div "Tx: " author-address " -> " name]
             [:div {:style {:margin-top 5}}
              text]
-            [:h3 {:style {:margin "5px 0 10px"}}
-             author-address]
-            [ui/divider]])]]])))
+            [ui/divider]])
+         [:br]
+         [ui/raised-button
+          {:secondary    true
+           :label        "decode"
+           :style        {:margin-top 15}
+           :on-touch-tap #(dispatch [:server/fetch-key (first @myaddrs) "xx" false])
+           }]
+         ]]])))

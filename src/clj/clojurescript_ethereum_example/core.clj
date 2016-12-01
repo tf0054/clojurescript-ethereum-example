@@ -12,13 +12,14 @@
 
 (def ^:dynamic *server*)
 
-(def dealers {"dealer01" {:name    "DEALER_A"
-                          :address "0x1"
-                          :key     "01dealer"}
-              "dealer02" {:name    "DEALER_B"
-                          :address "0x2"
-                          :key     "02dealer"}
-              })
+(def dealers {(clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
+              {:name "DEALER_A"
+               ;; :address "0xaaDC052Ee37f62889064b44F40D271441e18Be6e"
+               :key  "key01dealer"}
+              (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
+              {:name "DEALER_B"
+               ;; :address "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3"
+               :key  "key02dealer"}})
 
 (defroutes routes
 

@@ -1,6 +1,7 @@
 (ns clojurescript-ethereum-example.handlers
   (:require
    [clojure.string :as str]
+   [cljs.reader :as reader]
    [ajax.core :as ajax]
    [cljs-web3.core :as web3]
    [cljs-web3.eth :as web3-eth]
@@ -8,6 +9,7 @@
    [cljsjs.web3]
    [clojurescript-ethereum-example.db :as db]
    [day8.re-frame.http-fx]
+   [cljs-react-material-ui.reagent :as ui]
    [goog.string :as gstring]
    [goog.string.format]
    [madvas.re-frame.web3-fx]
@@ -89,10 +91,16 @@
  :contract/on-tweet-loaded
  interceptors
  (fn [db [tweet]]
-   (console :log "contract/on-tweet-loaded:" tweet)
+   (console :log "contract/on-tweet-loaded:" (.toNumber (:tweet-key tweet)) tweet)
+   ;;(dispatch [:server/fetch-key (get-in db [:new-tweet :address]) "xx" false])
    (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
                                   {:date      (u/big-number->date-time (:date tweet))
-                                   :tweet-key (.toNumber (:tweet-key tweet))}))))
+                                   :tweet-key (.toNumber (:tweet-key tweet))}))
+   ;; (update db :tweets conj (merge (select-keys tweet [:author-address :name])
+   ;;                                {:text      (u/getDecrypted (:tmp-key db) (:text tweet))
+   ;;                                 :date      (u/big-number->date-time (:date tweet))
+   ;;                                 :tweet-key (.toNumber (:tweet-key tweet))}))
+   ))
 
 (reg-event-db
  :contract/settings-loaded
@@ -246,8 +254,6 @@
  :ui/cAddrUpdate
  interceptors
  (fn [db [x]]
-   (console :log "hendler:ui/cAddrUpdate" (get-in db [:contract :address])
-            "->" x)
    (assoc-in db [:contract :address] x)
    ))
 
@@ -303,6 +309,7 @@
        :fns      [[:get-Balance x
                    :ui/amountNum :log-error]]}})))
 
+;; used?
 (reg-event-db
  :contract/filtered-tweet-loaded
  interceptors
@@ -317,6 +324,7 @@
  :ui/enquery
  (fn [db [_ id name price dealer]]
    (console :log "hendler:ui/enquery" (get-in db [:enquery :open]) id name price dealer)
+   (dispatch [:server/fetch-key dealer id true])
    (-> db
        (assoc-in [:enquery :open] true)
        (assoc-in [:enquery :id] id)
@@ -338,10 +346,10 @@
    (console :log "handler:enquery/send"
             (get-in db [:enquery :id]))
    (let [address (get-in db [:new-tweet :address])
-         json    (clj->js (dissoc (:enquery db) :open :lead-text))
-         strEnc  (u/getEncrypted "KEY" json)]
+         strClj  (pr-str (dissoc (:enquery db) :open :lead-text :dealer :key))
+         strEnc  (u/getEncrypted (get-in db [:enquery :key]) strClj)]
      ;; a json with id.. would be a encrypted sencente. 
-     (console :log "sending data:" json "->" strEnc)
+     (console :log "sending data:" strClj "->"  strEnc)
      ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
      {:db (assoc-in db [:enquery :open] false)
       :web3-fx.contract/state-fn
@@ -369,8 +377,55 @@
  :enquery/transaction-receipt-loaded
  interceptors
  (fn [db [{:keys [gas-used] :as transaction-receipt}]]
-   (console :log "Enquery was mined! like" transaction-receipt) 
+   (console :log "Enquery was mined! like" transaction-receipt)
    (when (= gas-used tweet-gas-limit)
      (console :error "All gas used"))
-   ;;(assoc-in db [:new-tweet :sending?] false)
+   ))
+
+(reg-event-fx
+ :server/fetch-key
+ interceptors
+ (fn [{:keys [db]} [dealer id customer?]]
+   (console :log "fetch:" dealer id)
+   {:http-xhrio {:method          :get
+                 :uri             (str "/key/" dealer "/" id)
+                 :timeout         6000
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success      (if customer?
+                                    [:customer-key-result [:enquery :key]]
+                                    [:dealer-key-result])
+                 :on-failure      [:log-error]}}))
+
+(reg-event-db
+ :customer-key-result
+ (fn [db [_ x result]]
+   (console :log "http-c-result(KEY):" (if-let [y (:key result)]
+                                         y
+                                         "cannot find!"))
+   (assoc-in db x (:key result))))
+
+(reg-event-db
+ :dealer-key-result
+ (fn [db [_ result]]
+   (console :log "http-d-result(KEY):" (if-let [x (:key result)]
+                                         x
+                                         "cannot find!")) 
+   (assoc-in db [:tweets] (into [] (map (fn [x]
+                                          (console :log "mapped:" x)
+                                          (merge (dissoc x :text)
+                                                 (if (> (.-length (:text x)) 40) ;; NOT GOOD
+                                                   (let [rawHash
+                                                         (reader/read-string
+                                                          (u/getDecrypted (:key result) (:text x)))]
+                                                     (console :log "DECODED:" rawHash)
+                                                     {:text [ui/paper {:style {:padding "0 10px 10px"}}
+                                                             [:div "CAR_NAME: " (:name rawHash)]
+                                                             [:div "PRICE: " (:price rawHash)]
+                                                             [:div "MESSAGE: "  (:text rawHash)]
+                                                             ]})
+                                                   {:text (:text x)}
+                                                   )
+                                                 ))
+                                        (:tweets db) )))
+
    ))

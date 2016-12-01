@@ -1,5 +1,7 @@
 (ns clojurescript-ethereum-example.db
-  (:require [cljs-web3.core :as web3]))
+  (:require
+   [clojure.string :as str]
+   [cljs-web3.core :as web3]))
 
 (def default-db
   {:tweets         []
@@ -22,7 +24,7 @@
                     :instance nil
                     ;; :address  "0x1a962b69f59b6879a0c25874aa86f8f2658aa368"
                     ;; :address  "0x7B51E82Cbeed5732845CFDFe58CFE9099a61d5De"
-                    :address  "0x5dF19f207F18f86C7106Fe5835f4075f78A593A8"
+                    :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
                     }
    :drawer         {:open false}
    :page           0
@@ -36,12 +38,12 @@
                      :name   "Fiat punto"
                      :price  1000000
                      :image  "/images/car001.jpg"
-                     :dealer "0xaaDC052Ee37f62889064b44F40D271441e18Be6e"}
+                     :dealer (str/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")}
                     {:id     "car002"
                      :name   "Fiat punto"
                      :price  1000000
                      :image  "/images/car002.jpg"
-                     :dealer "0xaaDC052Ee37f62889064b44F40D271441e18Be6e"}
+                     :dealer (str/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")}
                     {:id     "car003"
                      :name   "Fiat punto"
                      :price  1000000
@@ -62,5 +64,6 @@
                     :name      nil
                     :price     nil
                     :dealer    nil
-                    :text      nil}
+                    :text      nil
+                    :key       nil}
    })

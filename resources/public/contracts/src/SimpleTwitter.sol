@@ -74,11 +74,11 @@ contract SimpleTwitter {
             if (getBalance(name) > 0){
                 onTweetAdded(msg.sender,
                     utils.parseAddr(name),
-                    name, concat("FOUND(PAYED)!: ", text), now, idxTweets++);
+                    name, text, now, idxTweets++);
             } else {
                 onTweetAdded(msg.sender,
-                    utils.parseAddr(name),
-                    name, concat("FOUND!: ", text), now, idxTweets++);
+                    utils.parseAddr("0x39c4B70174041AB054f7CDb188d270Cc56D90da8"),
+                    name, text, now, idxTweets++);
             }
         }
     }
