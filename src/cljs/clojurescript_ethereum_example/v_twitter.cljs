@@ -1,11 +1,11 @@
 (ns clojurescript-ethereum-example.v-twitter
   (:require
-    [re-frame.core :refer [dispatch subscribe]]
-    [reagent.core :as r]
-    [clojurescript-ethereum-example.address-select-field :refer [address-select-field]]
-    [cljs-react-material-ui.reagent :as ui]
-    [cljs-react-material-ui.core :refer [get-mui-theme color]]
-    [clojurescript-ethereum-example.utils :as u]))
+   [re-frame.core :refer [dispatch subscribe]]
+   [reagent.core :as r]
+   ;; [clojurescript-ethereum-example.address-select-field :refer [address-select-field]]
+   [cljs-react-material-ui.reagent :as ui]
+   [cljs-react-material-ui.core :refer [get-mui-theme color]]
+   [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
@@ -20,7 +20,11 @@
     (fn []
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
-        [ui/paper {:style {:padding "0 20px 20px"}}
+        [ui/paper {:style {:margin-top "15px"
+                           :padding    20
+                           ;;:padding    "0 20px 20px"
+                           }}
+         [:h2 "Connection"]
          ;; [ui/text-field {:default-value       (:name @new-tweet)
          ;;                 :on-change           #(dispatch [:new-tweet/update :name (u/evt-val %)])
          ;;                 :name                "name"
@@ -35,10 +39,17 @@
          ;;                 :floating-label-text "What's happening?"
          ;;                 :style               {:width "100%"}}]
          ;; [:br]
-         [address-select-field
-          @my-addresses
-          (:address @new-tweet)
-          [:new-tweet/update :address]]
+         ;;
+         ;; [address-select-field
+         ;;  @my-addresses
+         ;;  (:address @new-tweet)
+         ;;  [:new-tweet/update :address]]
+         [ui/text-field {:default-value       (:address @new-tweet)
+                         :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
+                         :name                "MyAddr"
+                         ;; :max-length       (:max-tweet-length @settings)
+                         :floating-label-text "Your account (address)"
+                         :style               {:width "100%"}}]
          [:br]
          [:h3 "Balance: " (u/eth @balance)]
          ;;[:br]
@@ -81,19 +92,20 @@
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
         [ui/paper {:style {:padding 20 :margin-top 20}}
-         [:h1 "Tweets"]
+         [:h2 "Messages"]
          (for [{:keys [tweet-key name text date author-address]} @tweets]
            [:div {:style {:margin-top 20}
                   :key   tweet-key}
             [:h5 (u/format-date date)]
-            [:div "Tx: " author-address " -> " name]
-            [:div {:style {:margin-top 5}}
+            [:h5 "Tx: " author-address " -> " name]
+            [:div {:style {:margin-top 5
+                           :word-break "break-all"}
+                   :width 500}
              text]
-            [ui/divider]])
-         [:br]
+            [ui/divider {:style {:margin-top 5}}]])
          [ui/raised-button
           {:secondary    true
-           :label        "decode"
+           :label        "decode msg"
            :style        {:margin-top 15}
            :on-touch-tap #(dispatch [:server/fetch-key (first @myaddrs) "xx" false])
            }]

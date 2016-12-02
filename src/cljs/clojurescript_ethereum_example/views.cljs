@@ -21,14 +21,14 @@
                   }
        [ui/menu-item {:onTouchTap #(dispatch [:ui/drawer])} "-CLOSE-"]
        [ui/menu-item {:onTouchTap #(do
-                                     (dispatch [:ui/page 1])
-                                     (dispatch [:ui/drawer]))} "development"]
-       [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 0])
-                                     (dispatch [:ui/drawer]))} "default"]
+                                     (dispatch [:ui/drawer]))} "messages"]
        [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 2])
                                      (dispatch [:ui/drawer]))} "list"]
+       [ui/menu-item {:onTouchTap #(do
+                                     (dispatch [:ui/page 1])
+                                     (dispatch [:ui/drawer]))} "development"]
        ]
       )
     )
@@ -48,7 +48,7 @@
        {:mui-theme (get-mui-theme {:palette {:primary1-color (color :light-blue500)
                                              :accent1-color  (color :amber700)}})}
        [:div
-        [ui/app-bar {:title                    "Simple Decentralized Twitter"
+        [ui/app-bar {:title                    "Blockchain DEMO: \"carsensor.net\""
                      :onLeftIconButtonTouchTap #(do (dispatch [:ui/drawer])
                                                     ;; (println "LeftNav")
                                                     )

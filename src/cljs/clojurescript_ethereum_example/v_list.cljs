@@ -37,22 +37,27 @@
     (fn []
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
-        [ui/paper {:style {:padding 20 :margin-top 20}}
+        [ui/paper {:style {:padding 20 :margin-top 15}}
          [:h1 "cars"]
          (for [{:keys [id name price image dealer]} @cars]
-           [:div {:style {:margin-top 20}
+           [:div {:style {:margin-top 20
+                          :height     120}
                   :key   id}
-            [:img {:src image}]
-            [:h3 id]
-            [:h3 name]
-            [:h3 price]
-            [:h3 dealer]
+            [:img {:src    image
+                   :height 110}]
             [ui/raised-button
              {:secondary    true
               :label        "Enquery"
-              :style        {:margin-top 15}
+              :style        {:margin-top 15
+                             :float      "right"}
               :on-touch-tap #(do
                                ;;(println ":;::" id)
                                (dispatch [:ui/enquery id name price dealer]))
               }]
+            [:div {:style {:float         "right"
+                           :padding-right 80}}
+             [:h3 "CAR_ID: " id]
+             [:h3 "CAR_NAME: " name]
+             [:h3 "PRICE: " price]
+             [:h3 "DEALER: " dealer]]
             [ui/divider]])]]])))

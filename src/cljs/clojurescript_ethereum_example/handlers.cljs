@@ -418,7 +418,7 @@
                                                          (reader/read-string
                                                           (u/getDecrypted (:key result) (:text x)))]
                                                      (console :log "DECODED:" rawHash)
-                                                     {:text [ui/paper {:style {:padding "0 10px 10px"}}
+                                                     {:text [ui/paper {:style {:padding "5px 10px 10px"}}
                                                              [:div "CAR_NAME: " (:name rawHash)]
                                                              [:div "PRICE: " (:price rawHash)]
                                                              [:div "MESSAGE: "  (:text rawHash)]
