@@ -81,7 +81,7 @@
 
 
 (reg-sub
- :db/enquery
+ :db/enquiry
  (fn [db]
-   (:enquery db)))
+   (:enquiry db)))
 

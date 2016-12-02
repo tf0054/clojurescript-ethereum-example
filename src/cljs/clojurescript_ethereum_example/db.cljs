@@ -58,7 +58,7 @@
    :user           {:id       "0x"
                     :name     "Geroge"
                     :location "Tokyo"}
-   :enquery        {:open      false
+   :enquiry        {:open      false
                     :lead-text "test text"
                     :id        nil
                     :name      nil

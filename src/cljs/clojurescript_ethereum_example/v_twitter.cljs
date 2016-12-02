@@ -96,8 +96,8 @@
          (for [{:keys [tweet-key name text date author-address]} @tweets]
            [:div {:style {:margin-top 20}
                   :key   tweet-key}
-            [:h5 (u/format-date date)]
-            [:h5 "Tx: " author-address " -> " name]
+            [:h5 [:i "Date: "(u/format-date date)]]
+            [:h5 [:i "Tx: " author-address " -> " name]]
             [:div {:style {:margin-top 5
                            :word-break "break-all"}
                    :width 500}

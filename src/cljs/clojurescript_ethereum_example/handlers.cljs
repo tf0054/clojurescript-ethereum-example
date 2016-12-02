@@ -321,111 +321,64 @@
                    :tweet-key (.toNumber (:tweet-key tweet))}))))
 
 (reg-event-db
- :ui/enquery
+ :ui/enquiry
  (fn [db [_ id name price dealer]]
-   (console :log "hendler:ui/enquery" (get-in db [:enquery :open]) id name price dealer)
+   (console :log "hendler:ui/enquiry" (get-in db [:enquiry :open]) id name price dealer)
    (dispatch [:server/fetch-key dealer id true])
    (-> db
-       (assoc-in [:enquery :open] true)
-       (assoc-in [:enquery :id] id)
-       (assoc-in [:enquery :name] name)
-       (assoc-in [:enquery :price] price)
-       (assoc-in [:enquery :dealer] dealer))
+       (assoc-in [:enquiry :open] true)
+       (assoc-in [:enquiry :id] id)
+       (assoc-in [:enquiry :name] name)
+       (assoc-in [:enquiry :price] price)
+       (assoc-in [:enquiry :dealer] dealer))
    ))
 
 (reg-event-db
- :enquery/update
+ :enquiry/update
  interceptors
  (fn [db [value]]
-   (assoc-in db [:enquery :text] value)))
+   (assoc-in db [:enquiry :text] value)))
 
 (reg-event-fx
- :enquery/send
+ :enquiry/send
  interceptors
  (fn [{:keys [db]} []]
-   (console :log "handler:enquery/send"
-            (get-in db [:enquery :id]))
+   (console :log "handler:enquiry/send"
+            (get-in db [:enquiry :id]))
    (let [address (get-in db [:new-tweet :address])
-         strClj  (pr-str (dissoc (:enquery db) :open :lead-text :dealer :key))
-         strEnc  (u/getEncrypted (get-in db [:enquery :key]) strClj)]
+         strClj  (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
+         strEnc  (u/getEncrypted (get-in db [:enquiry :key]) strClj)]
      ;; a json with id.. would be a encrypted sencente. 
      (console :log "sending data:" strClj "->"  strEnc)
      ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
-     {:db (assoc-in db [:enquery :open] false)
+     {:db (assoc-in db [:enquiry :open] false)
       :web3-fx.contract/state-fn
       {:instance (:instance (:contract db))
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
-       :fn       [:add-tweet (str/lower-case (get-in db [:enquery :dealer])) strEnc
+       :fn       [:add-tweet (str/lower-case (get-in db [:enquiry :dealer])) strEnc
                   {:from address
                    :gas  tweet-gas-limit}
-                  :enquery/received
+                  :enquiry/received
                   :log-error
-                  :enquery/transaction-receipt-loaded]}
+                  :enquiry/transaction-receipt-loaded]}
       }
      )))
 
 (reg-event-db
- :enquery/received
+ :enquiry/received
  interceptors
  (fn [db [transaction-hash]]
-   (console :log "Enquery was confirmed! on" transaction-hash)
-   (assoc-in db [:enquery :text] "")
+   (console :log "Enquiry was confirmed! on" transaction-hash)
+   (assoc-in db [:enquiry :text] "")
    ))
 
 (reg-event-db
- :enquery/transaction-receipt-loaded
+ :enquiry/transaction-receipt-loaded
  interceptors
  (fn [db [{:keys [gas-used] :as transaction-receipt}]]
-   (console :log "Enquery was mined! like" transaction-receipt)
+   (console :log "Enquiry was mined! like" transaction-receipt)
    (when (= gas-used tweet-gas-limit)
      (console :error "All gas used"))
-   ))
-
-(reg-event-fx
- :server/fetch-key
- interceptors
- (fn [{:keys [db]} [dealer id customer?]]
-   (console :log "fetch:" dealer id)
-   {:http-xhrio {:method          :get
-                 :uri             (str "/key/" dealer "/" id)
-                 :timeout         6000
-                 :response-format (ajax/json-response-format {:keywords? true})
-                 :on-success      (if customer?
-                                    [:customer-key-result [:enquery :key]]
-                                    [:dealer-key-result])
-                 :on-failure      [:log-error]}}))
-
-(reg-event-db
- :customer-key-result
- (fn [db [_ x result]]
-   (console :log "http-c-result(KEY):" (if-let [y (:key result)]
-                                         y
-                                         "cannot find!"))
-   (assoc-in db x (:key result))))
-
-(reg-event-db
- :dealer-key-result
- (fn [db [_ result]]
-   (console :log "http-d-result(KEY):" (if-let [x (:key result)]
-                                         x
-                                         "cannot find!")) 
-   (assoc-in db [:tweets] (into [] (map (fn [x]
-                                          (console :log "mapped:" x)
-                                          (merge (dissoc x :text)
-                                                 (if (> (.-length (:text x)) 40) ;; NOT GOOD
-                                                   (let [rawHash
-                                                         (reader/read-string
-                                                          (u/getDecrypted (:key result) (:text x)))]
-                                                     (console :log "DECODED:" rawHash)
-                                                     {:text [ui/paper {:style {:padding "5px 10px 10px"}}
-                                                             [:div "CAR_NAME: " (:name rawHash)]
-                                                             [:div "PRICE: " (:price rawHash)]
-                                                             [:div "MESSAGE: "  (:text rawHash)]
-                                                             ]})
-                                                   {:text (:text x)}
-                                                   )
-                                                 ))
-                                        (:tweets db) )))
-
+   db
    ))
