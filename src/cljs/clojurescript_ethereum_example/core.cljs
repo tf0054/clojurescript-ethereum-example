@@ -5,6 +5,8 @@
    [cljsjs.react-flexbox-grid]
    [cljsjs.web3]
    [clojurescript-ethereum-example.handlers]
+   [clojurescript-ethereum-example.h-dev]
+   [clojurescript-ethereum-example.h-list]
    [clojurescript-ethereum-example.h-encrypt]
    [clojurescript-ethereum-example.subs]
    [clojurescript-ethereum-example.views :as views]
