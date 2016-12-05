@@ -25,29 +25,10 @@
                            ;;:padding    "0 20px 20px"
                            }}
          [:h2 "Connection"]
-         ;; [ui/text-field {:default-value       (:name @new-tweet)
-         ;;                 :on-change           #(dispatch [:new-tweet/update :name (u/evt-val %)])
-         ;;                 :name                "name"
-         ;;                 ;; :max-length          (:max-name-length @settings)
-         ;;                 :floating-label-text "Recipient address (0x...)"
-         ;;                 :style               {:width "90%"}}]
-         ;; [:br]
-         ;; [ui/text-field {:default-value       (:text @new-tweet)
-         ;;                 :on-change           #(dispatch [:new-tweet/update :text (u/evt-val %)])
-         ;;                 :name                "tweet"
-         ;;                 :max-length          (:max-tweet-length @settings)
-         ;;                 :floating-label-text "What's happening?"
-         ;;                 :style               {:width "100%"}}]
-         ;; [:br]
-         ;;
-         ;; [address-select-field
-         ;;  @my-addresses
-         ;;  (:address @new-tweet)
-         ;;  [:new-tweet/update :address]]
-         [ui/text-field {:default-value       (:address @new-tweet)
-                         :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
+
+         [ui/text-field {:value               (:address @new-tweet)
+                         :disabled            true
                          :name                "MyAddr"
-                         ;; :max-length       (:max-tweet-length @settings)
                          :floating-label-text "Your account (address)"
                          :style               {:width "100%"}}]
          [:br]
