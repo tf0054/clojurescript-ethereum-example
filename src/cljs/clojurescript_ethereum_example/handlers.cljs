@@ -44,6 +44,19 @@
  :blockchain/my-addresses-loaded
  interceptors
  (fn [{:keys [db]} [addresses]]
+   (dispatch [:server/fetch-userrole (first addresses)])
+   ;; Checking Metamask account change
+   (comment
+     (let [web3    (:web3 db/default-db)
+           eth     (.-eth web3)
+           account (first addresses)]
+       (js/setInterval
+        (fn [] (let [cAddr (get-in db [:new-tweet :account])]
+                 (console :log "Account check!" account ":" cAddr)
+                 (if (nil? (get-in db [:new-tweet :account]))
+                   (if (not (== account (get-in db [:new-tweet :account])))
+                     (dispatch [:initialize]))
+                   ))) 3000)))
    {:db (-> db
             (assoc :my-addresses addresses)
             (assoc-in [:new-tweet :address] (first addresses)))
@@ -92,14 +105,9 @@
  interceptors
  (fn [db [tweet]]
    (console :log "contract/on-tweet-loaded:" (.toNumber (:tweet-key tweet)) tweet)
-   ;;(dispatch [:server/fetch-key (get-in db [:new-tweet :address]) "xx" false])
    (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
                                   {:date      (u/big-number->date-time (:date tweet))
-                                   :tweet-key (.toNumber (:tweet-key tweet))}))
-   ;; (update db :tweets conj (merge (select-keys tweet [:author-address :name])
-   ;;                                {:text      (u/getDecrypted (:tmp-key db) (:text tweet))
-   ;;                                 :date      (u/big-number->date-time (:date tweet))
-   ;;                                 :tweet-key (.toNumber (:tweet-key tweet))}))
+                                   :tweet-key (.toNumber (:tweet-key tweet))}))   
    ))
 
 (reg-event-db
@@ -232,4 +240,25 @@
  (fn [db [x]]
    (console :log "hendler:ui/page" (get-in db [:page]) "->" x)
    (assoc-in db [:page] x)
+   ))
+
+(reg-event-fx
+ :server/fetch-userrole
+ interceptors
+ (fn [{:keys [db]} [id]]
+   (console :log "fetch:" id)
+   {:http-xhrio {:method          :get
+                 :uri             (str "/users/" id)
+                 :timeout         6000
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success      [:userrole-result]
+                 :on-failure      [:log-error]}}))
+
+(reg-event-db
+ :userrole-result
+ interceptors
+ (fn [db [json]]
+   (let [x (:role json)]
+     (console :log "userrole:" x)
+     (assoc-in db [:new-tweet :role] x))
    ))

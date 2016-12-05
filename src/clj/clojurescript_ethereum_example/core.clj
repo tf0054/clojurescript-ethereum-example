@@ -12,13 +12,23 @@
 
 (def ^:dynamic *server*)
 
+;; For browser
+(def users {
+            (clojure.string/lower-case "0x39c4B70174041AB054f7CDb188d270Cc56D90da8")
+            {:role "RTC"}
+            (clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
+            {:role "DEALER01"}
+            (clojure.string/lower-case "0x78348AA884Cb4b4619514e728631742AE8Dd9927")
+            {:role "CUSTOMER01"}
+
+            })
+
+;; For providing the key
 (def dealers {(clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
               {:name "DEALER_A"
-               ;; :address "0xaaDC052Ee37f62889064b44F40D271441e18Be6e"
                :key  "key01dealer"}
               (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
               {:name "DEALER_B"
-               ;; :address "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3"
                :key  "key02dealer"}})
 
 (defroutes routes
@@ -38,15 +48,28 @@
         })
   
   ;; DEALER INFO
-  (GET "/dealers/:id" [id];; "/dealers/" isnt dealt with.
-       (println "dealers: " id)
-       {:status  200
-        :headers {"Content-Type" "text/html; charset=utf-8"}
-        :body    (json/generate-string
-                  (if (nil? (and id (get dealers id)))
-                    {}
-                    (get dealers id)))
-        })
+  (GET "/dealers/:raw_id" [raw_id];; "/dealers/" isnt dealt with.
+       (let [id (clojure.string/lower-case raw_id)]
+         (println "dealers: " id)
+         {:status  200
+          :headers {"Content-Type" "text/html; charset=utf-8"}
+          :body    (json/generate-string
+                    (if (nil? (and id (get dealers id)))
+                      {}
+                      (get dealers id)))
+          }))
+
+  ;; USER INFO
+  (GET "/users/:raw_id" [raw_id];; "/users/" isnt dealt with.
+       (let [id (clojure.string/lower-case raw_id)]
+         (println "users: " id)
+         {:status  200
+          :headers {"Content-Type" "text/html; charset=utf-8"}
+          :body    (json/generate-string
+                    (if (nil? (and id (get users id)))
+                      {}
+                      (get users id)))
+          }))
   
   (GET "/js/*" _
        {:status 404})

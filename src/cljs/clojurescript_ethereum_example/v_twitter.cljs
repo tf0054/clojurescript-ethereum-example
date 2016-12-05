@@ -26,7 +26,9 @@
                            }}
          [:h2 "Connection"]
 
-         [ui/text-field {:value               (:address @new-tweet)
+         [ui/text-field {:value               (str (:address @new-tweet)
+                                                   " - "
+                                                   (:role @new-tweet) )
                          :disabled            true
                          :name                "MyAddr"
                          :floating-label-text "Your account (address)"

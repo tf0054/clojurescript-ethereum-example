@@ -12,6 +12,7 @@
    :new-tweet      {:text     ""
                     :name     ""
                     :address  nil
+                    :role     nil
                     :sending? false}
    :web3           (or (aget js/window "web3")
                        (if goog.DEBUG
