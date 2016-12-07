@@ -62,6 +62,7 @@
         [:div (display @page 1)
          [v_dev/dev-component0]
          [v_dev/dev-component1]
+         [v_dev/dev-component2]
          ]
         ;; list
         [:div (display @page 2)

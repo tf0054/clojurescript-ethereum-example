@@ -57,6 +57,24 @@
          [:h3 "Balance: " @aamount] 
          ]]])))
 
+(defn dev-component2 []
+  (let [cars (subscribe [:db/cars])]
+    (fn []
+      [row
+       [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
+        [ui/paper {:style {:padding "0 20px 20px"}}
+         ;;(map #([:div (:id %)]) @cars)
+         (pr-str @cars)
+         [:br]
+         [ui/raised-button
+          {:secondary    true
+           :label        "Update cars"
+           :style        {:margin-top 15}
+           :on-touch-tap #(dispatch [:dev/fetch-cars])
+           }]
+         [:br]         
+         ]]])))
+
 (comment
   (defn tweets-component []
     (let [tweets (subscribe [:db/tweets])]

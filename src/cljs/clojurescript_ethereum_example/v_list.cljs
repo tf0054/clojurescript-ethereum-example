@@ -56,5 +56,5 @@
              [:h3 "CAR_ID: " id]
              [:h3 "CAR_NAME: " name]
              [:h3 "PRICE: " price]
-             [:h3 "DEALER: " dealer]]
+             [:h3 "DEALER: " (str (subs dealer 0 16) "...")]]
             [ui/divider]])]]])))

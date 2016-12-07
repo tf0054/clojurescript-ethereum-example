@@ -73,16 +73,29 @@
   
   (GET "/js/*" _
        {:status 404})
+
+  (GET "/cors" _
+       {:status  200
+        :headers {"Content-Type"                "text/html; charset=utf-9"
+                  "Access-Control-Allow-Origin" "*"}
+        :body    (io/input-stream (io/resource "public/index.html"))
+        })
+
+  ;; not used while using figwheel
   (GET "/" _
        {:status  200
-        :headers {"Content-Type" "text/html; charset=utf-8"}
-        :body    (io/input-stream (io/resource "public/index.html"))}) )
+        :headers {"Content-Type"                "text/html; charset=utf-8"
+                  "Access-Control-Allow-Origin" "*"}
+        :body    (io/input-stream (io/resource "public/index.html"))
+        }) 
+  )
 
 (def http-handler
   (-> routes
       (wrap-defaults site-defaults)
       wrap-with-logger
-      wrap-gzip))
+      wrap-gzip
+      ))
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 6655))]

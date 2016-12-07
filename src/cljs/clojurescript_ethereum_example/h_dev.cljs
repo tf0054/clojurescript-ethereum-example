@@ -15,7 +15,11 @@
    [madvas.re-frame.web3-fx]
    [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
    [clojurescript-ethereum-example.utils :as u]
+   [clojure.set :refer [rename-keys]]
    )
+  (:import goog.History
+           goog.Uri
+           goog.net.Jsonp)
   )
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
@@ -97,4 +101,52 @@
       {:instance (:instance (:contract db))
        :fns      [[:get-Balance x
                    :ui/amountNum :log-error]]}})))
+
+
+(defn- success-handler [x]
+  ;;(console :log "CS:" (pr-str x))
+  (let [res (js->clj x :keywordize-keys true)]
+    (let [resdb (into [] (map #(merge (-> %
+                                          (select-keys [:id :model :price])
+                                          (rename-keys {:model :name}))
+                                      {:image (get-in % [:photo :main :s])}
+                                      {:dealer (str/lower-case
+                                                (rand-nth
+                                                 ["0x043b8174e15217f187De5629d219e78207f63DCE"
+                                                  "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3"]
+                                                 ))}
+                                      {:dealer_name (rand-nth ;; DEBUG
+                                                     ["A-SHOP"
+                                                      "D-SHOP"]
+                                                     )})
+                              (get-in res [:results :usedcar])))]
+      ;;(console :log "cardb:" (pr-str resdb))
+      (dispatch [:dev/update-cars resdb])
+      )))
+
+(defn- error-handler [res]
+  (console :log (str "API error occured: " res)))
+
+(reg-event-db
+ :dev/fetch-cars
+ interceptors
+ (fn [db _]
+   (console :log "dev/fetch-cars:")
+   (let [url   (str "https://webservice.recruit.co.jp/carsensor/usedcar/v1/"
+                    "?key=916f3b97bf003394"
+                    "&pref=" (+ (rand-int 10) 10)
+                    "&price_min=100000&order=5"
+                    "&count=5&format=jsonp")
+         jsonp (goog.net.Jsonp. (Uri. url))]
+     (.setRequestTimeout jsonp (* 1000 10))
+     (.send jsonp nil success-handler error-handler))
+   db
+   ))
+
+(reg-event-db
+ :dev/update-cars
+ interceptors
+ (fn [db [x]]
+   (assoc-in db [:cars] x)
+   ))
 
