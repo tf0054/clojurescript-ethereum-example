@@ -7,8 +7,10 @@
    [cljs-web3.eth :as web3-eth]
    [cljs-web3.personal :as web3-personal]
    [cljsjs.web3]
+   [ajax.core :refer [GET POST url-request-format]]
    [clojurescript-ethereum-example.db :as db]
    [day8.re-frame.http-fx]
+   [re-frame.core :refer [dispatch subscribe]]
    [cljs-react-material-ui.reagent :as ui]
    [goog.string :as gstring]
    [goog.string.format]
@@ -43,8 +45,41 @@
  :ui/cAddrUpdate
  interceptors
  (fn [db [x]]
-   (assoc-in db [:contract :address] x)
-   ))
+   (assoc-in db [:contract :address] x)))
+
+(reg-event-db
+ :ui/loginEmailUpdate
+ interceptors
+ (fn [db [x]]
+   (assoc-in db [:login :email] x)))
+
+(reg-event-db
+ :ui/loginPasswordUpdate
+ interceptors
+ (fn [db [x]]
+   (assoc-in db [:login :password] x)))
+
+(reg-event-db
+ :ui/login
+ interceptors
+ (fn [db]
+   (let [page (subscribe [:db/page])]
+     (.log js/console db)
+     (.log js/console "email")
+     (.log js/console (get-in db [:login :email]))
+     (.log js/console "password")
+     (.log js/console (get-in db [:login :password]))
+     (.log js/console "ログイン失敗")
+     (POST "/login"
+           {:params          {:email    (get-in db [:login :email])
+                              :password (get-in db [:login :password])}
+            :handler         (fn [res]
+                               (assoc db :page 0)
+                               (.log js/console res))
+            :response-format :json
+            :keywords?       true
+            :format          (url-request-format)}))))
+
 
 (reg-event-fx
  :ui/cInstUpdate
@@ -97,4 +132,3 @@
       {:instance (:instance (:contract db))
        :fns      [[:get-Balance x
                    :ui/amountNum :log-error]]}})))
-

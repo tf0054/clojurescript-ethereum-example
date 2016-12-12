@@ -7,6 +7,7 @@
    [clojurescript-ethereum-example.v-twitter :as v_twitter]
    [clojurescript-ethereum-example.v-dev :as v_dev]
    [clojurescript-ethereum-example.v-list :as v_list]
+   [clojurescript-ethereum-example.v-login :as v_login]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
@@ -68,6 +69,7 @@
          [v_list/enquiry-component]
          [v_list/list-component] 
          ]
-
+        [:div (display @page 3)
+         [v_login/login-component]]
         ]])))
 

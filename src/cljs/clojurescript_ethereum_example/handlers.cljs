@@ -231,5 +231,7 @@
  interceptors
  (fn [db [x]]
    (console :log "hendler:ui/page" (get-in db [:page]) "->" x)
-   (assoc-in db [:page] x)
-   ))
+   (if-not (nil? (:keystore db)) 
+     (assoc-in db [:page] x)
+     (assoc-in db [:page] 3) ;; jump to login
+   )))

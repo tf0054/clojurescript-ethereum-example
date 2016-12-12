@@ -5,6 +5,7 @@
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [ring.middleware.gzip :refer [wrap-gzip]]
             [ring.middleware.logger :refer [wrap-with-logger]]
+            [ring.middleware.json :refer [wrap-json-params]]
             [environ.core :refer [env]]
             [cheshire.core :as json]
             [org.httpkit.server :refer [run-server]])
@@ -12,31 +13,34 @@
 
 (def ^:dynamic *server*)
 
-(def users
-  {"a@a.a" {:email "a@a.a" :password "password" :key-store nil}
-   "b@b.b" {:email "b@b.b" :password "password" :key-store nil}})
+(def users (atom {"a@a.a" {:email "a@a.a" :password "password" :key-store nil}
+                  "b@b.b" {:email "b@b.b" :password "password" :key-store nil}}))
 
 (defn login-ok?
   [email password]
-  (if (and (not (nil? (users email)))
-           (= password (:password (users email))))
+  (if (and (not (nil? (@users email)))
+           (= password (:password (@users email))))
     true
     false))
 
 (defn login [session {email :email password :password  :as params}]
   (if (login-ok? email password)
-    (users email)
-    {}))
+    {:success true :user (@users email)}
+    {:success false}))
+
+(defn reg-keystore
+  [session {email :email keystore :keystore}]
+  (swap! users assoc-in [email :keystore] keystore))
 
 (defn json-response
   [body & more]
   (let [response {:status  200
-                 :headers {"Content-Type" "text/html; charset=utf-8"}
-                 :body    (json/generate-string body)}
-       session  (first more)]
-       (if-not (nil? session)
-         (assoc response :session session)
-         response)))
+                  :headers {"Content-Type" "text/html; charset=utf-8"}
+                  :body    (json/generate-string body)}
+        session  (first more)]
+    (if-not (nil? session)
+      (assoc response :session session)
+      response)))
 
 (def dealers {(clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
               {:name "DEALER_A"
@@ -88,6 +92,7 @@
       ;; (wrap-defaults site-defaults)
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
       wrap-with-logger
+      wrap-json-params
       wrap-gzip))
 
 (defn -main [& [port]]

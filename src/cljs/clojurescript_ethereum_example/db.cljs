@@ -27,7 +27,7 @@
                     :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
                     }
    :drawer         {:open false}
-   :page           0
+   :page           3
    :tweetsNum      0
    :dev            {:address nil
                     :amount  0
@@ -66,4 +66,6 @@
                     :dealer    nil
                     :text      nil
                     :key       nil}
+   :login          {:email    ""
+                    :password ""}
    })
