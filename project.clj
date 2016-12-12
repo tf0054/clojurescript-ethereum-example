@@ -29,6 +29,7 @@
                  [io.github.theasp/simple-encryption "0.1.0"
                   :exclusions [com.taoensso/timbre]]
                  [com.taoensso/timbre "4.7.4"]
+                 [binaryage/dirac "0.8.6"]
                  ]
 
   :plugins [[lein-auto "0.1.2"]
@@ -45,6 +46,7 @@
 
   :figwheel {:css-dirs     ["resources/public/css"]
              :server-port  8080
+             :nrepl-port   9000
              :ring-handler user/http-handler}
 
   :auto {"compile-solidity" {:file-pattern #"\.(sol)$"
