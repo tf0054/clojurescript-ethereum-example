@@ -7,7 +7,6 @@
    [cljs-web3.eth :as web3-eth]
    [cljs-web3.personal :as web3-personal]
    [cljsjs.web3]
-   [ajax.core :refer [GET POST url-request-format]]
    [clojurescript-ethereum-example.db :as db]
    [day8.re-frame.http-fx]
    [re-frame.core :refer [dispatch subscribe]]
@@ -63,23 +62,7 @@
  :ui/login
  interceptors
  (fn [db]
-   (let [page (subscribe [:db/page])]
-     (.log js/console db)
-     (.log js/console "email")
-     (.log js/console (get-in db [:login :email]))
-     (.log js/console "password")
-     (.log js/console (get-in db [:login :password]))
-     (.log js/console "ログイン失敗")
-     (POST "/login"
-           {:params          {:email    (get-in db [:login :email])
-                              :password (get-in db [:login :password])}
-            :handler         (fn [res]
-                               (assoc db :page 0)
-                               (.log js/console res))
-            :response-format :json
-            :keywords?       true
-            :format          (url-request-format)}))))
-
+   (assoc db :page 0)))
 
 (reg-event-fx
  :ui/cInstUpdate
