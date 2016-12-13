@@ -10,6 +10,30 @@
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
 
+
+(defn enter-password
+  [callback]
+  (let [pw (js/prompt "Please Enter Password" "password")]
+    (callback nil pw)))
+
+(defn login-success-handler [res]
+  (dispatch [:ui/login])
+  (let [keystore (.-keystore js/lightwallet)]
+    (.createVault keystore
+                  (clj->js {:password "aaa" :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"})
+                  (fn[err ks]
+                    (if-not (nil? err) (throw err))
+                    (.keyFromPassword ks "aaa"
+                                      (fn
+                                        [err pw-derived-key]
+                                        (if-not (nil? err)
+                                          (throw err))
+                                        (.generateNewAddress ks pw-derived-key 3)
+                                        (.log js/console ks)
+                                        (set! (.-passwordProvider ks)
+                                              enter-password)))))
+    (.log js/console res)))
+
 (defn login-component []
   [row
    [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
@@ -44,9 +68,7 @@
                          (POST "/login"
                                {:params          {:email    (:email @login)
                                                   :password (:password @login)}
-                                :handler         (fn [res]
-                                                   (dispatch [:ui/login])
-                                                   (.log js/console res))
+                                :handler         login-success-handler
                                 :response-format :json
                                 :keywords?       true
                                 :format          (url-request-format)})))
