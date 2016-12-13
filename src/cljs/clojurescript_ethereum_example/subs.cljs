@@ -85,3 +85,8 @@
  (fn [db]
    (:enquiry db)))
 
+(reg-sub
+ :db/monitor
+ (fn [db]
+   (:monitor db)))
+

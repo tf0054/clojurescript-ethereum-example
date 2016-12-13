@@ -75,6 +75,23 @@
          [:br]         
          ]]])))
 
+(defn dev-component3 []
+  (let [data (subscribe [:db/monitor])]
+    (fn []
+      [row
+       [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
+        [ui/paper {:style {:padding "0 20px 20px"}}
+         (pr-str @data)
+         [:br]
+         [ui/raised-button
+          {:secondary    true
+           :label        "Connect"
+           :style        {:margin-top 15}
+           :on-touch-tap #(dispatch [:dev/etherscan-connect])
+           }]
+         [:br]         
+         ]]])))
+
 (comment
   (defn tweets-component []
     (let [tweets (subscribe [:db/tweets])]

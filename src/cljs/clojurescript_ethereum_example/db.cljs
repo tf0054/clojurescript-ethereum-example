@@ -68,4 +68,9 @@
                     :dealer    nil
                     :text      nil
                     :key       nil}
+   :monitor        {:rtc {:conn    nil
+                          :address nil
+                          :role    nil
+                          :amount  nil
+                          :update  nil}}
    })

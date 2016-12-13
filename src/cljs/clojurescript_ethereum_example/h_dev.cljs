@@ -1,11 +1,12 @@
 (ns clojurescript-ethereum-example.h-dev
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs-react-material-ui.reagent :as ui]
             [cljs-web3.eth :as web3-eth]
             [clojure.set :refer [rename-keys]]
             [clojure.string :as str]
-            [re-frame.core
-             :refer
-             [console dispatch reg-event-db reg-event-fx trim-v]])
+            [re-frame.core :refer [console dispatch reg-event-db reg-event-fx trim-v]]
+            [chord.client :refer [ws-ch]]
+            [cljs.core.async :refer [chan <! >! put! close!]])
   (:import goog.net.Jsonp
            goog.Uri))
 
@@ -137,3 +138,22 @@
    (assoc-in db [:cars] x)
    ))
 
+(reg-event-db
+ :dev/etherscan-update
+ interceptors
+ (fn [db [ch]]
+   (assoc-in db [:monitor :rtc :conn] ch)))
+
+(reg-event-db
+ :dev/etherscan-connect
+ interceptors
+ (fn [db _]
+   (go
+     (console :log "dev/etherscan-connect:")
+     (let [x     (<! (ws-ch "ws://socket.etherscan.io/wshandler" {:format :json-kw}))
+           ch    (:ws-channel x)
+           error (:error x)]
+       (if-not error
+         (dispatch [:dev/etherscan-update ch])
+         (js/console.log "Error:" (pr-str error)))) )
+   db))
