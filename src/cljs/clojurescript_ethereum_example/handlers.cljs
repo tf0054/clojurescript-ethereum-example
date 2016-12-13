@@ -59,33 +59,34 @@
  interceptors
  (fn [{:keys [db]} [abi]]
    (console :log "abi-loaded:" (get-in db [:contract :address]))
-   (let [web3              (:web3 db)
-         contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
-         db                (-> db
-                               (assoc-in [:contract :abi] abi)
-                               (assoc-in [:contract :instance] contract-instance)
-                               (assoc-in [:tweets] nil))]
-     {:db db
-      ;; :web3-fx.contract/events
-      ;; {:instance contract-instance
-      ;;  :db       db
-      ;;  :db-path  [:contract :events]
-      ;;  :events   [[:on-tweet-added
-      ;;              {}
-      ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
+   (if-not (nil? (:web3 db))
+     (let [web3              (:web3 db)
+           contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
+           db                (-> db
+                                 (assoc-in [:contract :abi] abi)
+                                 (assoc-in [:contract :instance] contract-instance)
+                                 (assoc-in [:tweets] nil))]
+       {:db db
+        ;; :web3-fx.contract/events
+        ;; {:instance contract-instance
+        ;;  :db       db
+        ;;  :db-path  [:contract :events]
+        ;;  :events   [[:on-tweet-added
+        ;;              {}
+        ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
-      :web3-fx.contract/events
-      {:instance contract-instance
-       :db       db
-       :db-path  [:contract :events2]
-       :events   [[:on-tweet-added ;; definition name
-                   {:indexed-addr (get-in db [:new-tweet :address])}
-                   ;;{}
-                   {:from-block 0} :contract/on-tweet-loaded :log-error]]}
+        :web3-fx.contract/events
+        {:instance contract-instance
+         :db       db
+         :db-path  [:contract :events2]
+         :events   [[:on-tweet-added ;; definition name
+                     {:indexed-addr (get-in db [:new-tweet :address])}
+                     ;;{}
+                     {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
-      :web3-fx.contract/constant-fns
-      {:instance contract-instance
-       :fns      [[:get-settings :contract/settings-loaded :log-error]]}})))
+        :web3-fx.contract/constant-fns
+        {:instance contract-instance
+         :fns      [[:get-settings :contract/settings-loaded :log-error]]}}))))
 
 (reg-event-db
  :contract/on-tweet-loaded
@@ -223,7 +224,7 @@
    (console :log "hendler:ui/drawer" (get-in db [:drawer :open]))
    (if (get-in db [:drawer :open])
      (assoc-in db [:drawer :open] false)
-     (assoc-in db [:drawer :open] true) )   
+     (assoc-in db [:drawer :open] true) )
    ))
 
 (reg-event-db
@@ -231,7 +232,7 @@
  interceptors
  (fn [db [x]]
    (console :log "hendler:ui/page" (get-in db [:page]) "->" x)
-   (if-not (nil? (:keystore db)) 
+   (if-not (nil? (:keystore db))
      (assoc-in db [:page] x)
      (assoc-in db [:page] 3) ;; jump to login
-   )))
+     )))
