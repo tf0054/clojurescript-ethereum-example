@@ -44,15 +44,19 @@
  :blockchain/my-addresses-loaded
  interceptors
  (fn [{:keys [db]} [addresses]]
-   {:db (-> db
-            (assoc :my-addresses addresses)
-            (assoc-in [:new-tweet :address] (first addresses)))
-    :web3-fx.blockchain/balances
-    {:web3                   (:web3 db/default-db)
-     :addresses              addresses
-     :watch?                 true
-     :blockchain-filter-opts "latest"
-     :dispatches             [:blockchain/balance-loaded :log-error]}}))
+   (let [ks       (:keystore db)
+         provider (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost" :transaction_signer ks}))
+         web3     (js/Web3.)]
+     (web3/set-provider web3 provider)
+     {:db (-> db
+              (assoc :my-addresses addresses)
+              (assoc-in [:new-tweet :address] (first addresses)))
+      :web3-fx.blockchain/balances
+      {:web3                   web3
+       :addresses              addresses
+       :watch?                 true
+       :blockchain-filter-opts "latest"
+       :dispatches             [:blockchain/balance-loaded :log-error]}})))
 
 (reg-event-fx
  :contract/abi-loaded

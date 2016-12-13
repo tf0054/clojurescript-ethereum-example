@@ -31,6 +31,7 @@
                   :exclusions [com.taoensso/timbre]]
                  [com.taoensso/timbre "4.7.4"]
                  [binaryage/dirac "0.8.6"]
+                 [hodgepodge "0.1.3"]
                  ]
 
   :plugins [[lein-auto "0.1.2"]

@@ -69,4 +69,5 @@
                     :key       nil}
    :login          {:email    ""
                     :password ""}
+   :keystore       nil
    })

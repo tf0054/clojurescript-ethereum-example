@@ -90,3 +90,8 @@
  :db/login
  (fn [db]
    (:login db)))
+
+(reg-sub
+ :db/keystore
+ (fn [db]
+   (:keystore db)))

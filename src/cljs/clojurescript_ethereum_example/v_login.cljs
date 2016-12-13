@@ -5,6 +5,7 @@
    [cljs-react-material-ui.reagent :as ui]
    [ajax.core :refer [GET POST url-request-format]]
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
+   [hodgepodge.core :refer [session-storage get-item set-item]]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
@@ -20,7 +21,9 @@
   (dispatch [:ui/login])
   (let [keystore (.-keystore js/lightwallet)]
     (.createVault keystore
-                  (clj->js {:password "aaa" :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"})
+                  (clj->js {:password "aaa"
+                            ;; :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"
+                            })
                   (fn[err ks]
                     (if-not (nil? err) (throw err))
                     (.keyFromPassword ks "aaa"
@@ -29,9 +32,14 @@
                                         (if-not (nil? err)
                                           (throw err))
                                         (.generateNewAddress ks pw-derived-key 3)
-                                        (.log js/console ks)
-                                        (set! (.-passwordProvider ks)
-                                              enter-password)))))
+                                        (.log js/console (.getAddresses ks))
+                                        (.log js/console (.serialize ks))
+                                        (set! (.-passwordProvider ks) enter-password)
+                                        (set-item session-storage "keystore" (.serialize ks))
+                                        (dispatch [:ui/keystore ks])
+                                        (dispatch [:blockchain/my-addresses-loaded (.getAddresses ks)])
+                                        (dispatch [:contract/on-tweet-loaded])
+                                        ))))
     (.log js/console res)))
 
 (defn login-component []

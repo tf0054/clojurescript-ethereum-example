@@ -64,6 +64,12 @@
  (fn [db]
    (assoc db :page 0)))
 
+(reg-event-db
+ :ui/keystore
+ interceptors
+ (fn [db [ks]]
+   (assoc db :keystore ks))) 
+
 (reg-event-fx
  :ui/cInstUpdate
  interceptors
