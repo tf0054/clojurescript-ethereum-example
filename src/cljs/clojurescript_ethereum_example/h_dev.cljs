@@ -68,7 +68,23 @@
  :ui/keystore
  interceptors
  (fn [db [ks]]
-   (assoc db :keystore ks))) 
+   (assoc db :keystore ks)))
+
+(reg-event-db
+ :ui/web3
+ interceptors
+ (fn [db [ks]]
+   (let [ks        (:keystore db)
+         provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost:8545" :transaction_signer ks}))
+         web3      (js/Web3.)
+         addresses (map #(str "0x" %) (js->clj (.getAddresses ks)))]
+     (web3/set-provider web3 provider)
+     (-> db
+         (assoc :my-addresses addresses)
+         (assoc :web3 web3)
+         ;;(assoc-in [:new-tweet :address] (first addresses))
+         (assoc :provides-web3? true)))) )
+
 
 (reg-event-fx
  :ui/cInstUpdate

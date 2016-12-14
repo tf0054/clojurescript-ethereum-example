@@ -48,6 +48,7 @@
  (fn [{:keys [db]} []]
    (console :log "handler:enquiry/send"
             (get-in db [:enquiry :id]))
+   (console :log "send db: " db)
    (let [address (get-in db [:new-tweet :address])
          strClj  (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
          strEnc  (u/getEncrypted (get-in db [:enquiry :key]) strClj)]

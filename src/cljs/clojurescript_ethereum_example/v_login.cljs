@@ -5,7 +5,7 @@
    [cljs-react-material-ui.reagent :as ui]
    [ajax.core :refer [GET POST url-request-format]]
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
-   [hodgepodge.core :refer [session-storage get-item set-item]]
+   [hodgepodge.core :refer [session-storage get-item set-item get-item]]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
@@ -17,29 +17,108 @@
   (let [pw (js/prompt "Please Enter Password" "password")]
     (callback nil pw)))
 
-(defn login-success-handler [res]
-  (dispatch [:ui/login])
+
+
+(defn deserialize-handler
+  []
   (let [keystore (.-keystore js/lightwallet)]
-    (.createVault keystore
-                  (clj->js {:password "aaa"
-                            ;; :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"
-                            })
+    (.log js/console (.deserialize keystore (get-item session-storage "keystore")))
+    ;; (.createVault keystore
+    ;;               (clj->js {:password "aaa"
+    ;;                         ;; :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"
+    ;;                         })
+    ;;               (fn[err ks]
+    ;;                 (if-not (nil? err) (throw err))
+    ;;                 (.keyFromPassword ks "aaa"
+    ;;                                   (fn
+    ;;                                     [err pw-derived-key]
+    ;;                                     (if-not (nil? err)
+    ;;                                       (throw err))
+    ;;                                     (.generateNewAddress ks pw-derived-key 3)
+    ;;                                     (.log js/console (.getAddresses ks))
+    ;;                                     (.log js/console (.serialize ks))
+    ;;                                     (set! (.-passwordProvider ks) enter-password)
+    ;;                                     (set-item session-storage "keystore" (.serialize ks))
+    ;;                                     (dispatch [:ui/keystore ks])
+    ;;                                     (dispatch [:ui/web3 ks])
+    ;;                                     (dispatch [:blockchain/my-addresses-loaded])
+    ;;                                     (dispatch [:reload])
+    ;;                                     ))))
+    ))
+
+(defn register-handler
+  []
+  (let [login    (subscribe [:db/login])
+        keystore (.-keystore js/lightwallet)]
+    (.createVault keystore (clj->js {:password (:password @login)})
                   (fn[err ks]
                     (if-not (nil? err) (throw err))
-                    (.keyFromPassword ks "aaa"
-                                      (fn
-                                        [err pw-derived-key]
+                    (.keyFromPassword ks (:password @login)
+                                      (fn [err pw-derived-key]
                                         (if-not (nil? err)
                                           (throw err))
                                         (.generateNewAddress ks pw-derived-key 3)
                                         (.log js/console (.getAddresses ks))
                                         (.log js/console (.serialize ks))
                                         (set! (.-passwordProvider ks) enter-password)
-                                        (set-item session-storage "keystore" (.serialize ks))
-                                        (dispatch [:ui/keystore ks])
-                                        (dispatch [:blockchain/my-addresses-loaded (.getAddresses ks)])
-                                        (dispatch [:contract/on-tweet-loaded])
-                                        ))))
+                                        (POST "/register"
+                                              {:params          {:email    (:email @login)
+                                                                 :password (:password @login)
+                                                                 :keystore (.serialize ks)}
+                                               :handler         (fn [res] (.log js/console res))
+                                               :response-format :json
+                                               :keywords?       true
+                                               :format          (url-request-format)})))))))
+
+
+(defn login-success-handler [res]
+  (dispatch [:ui/login])
+  (.log js/console res)
+  (.log js/console (:keystore (:user res)))
+  (.log js/console (.parse js/JSON (:keystore (:user res))))
+  (let [keystore (.-keystore js/lightwallet)
+        ks       (.deserialize keystore (:keystore (:user res)))
+        login    (subscribe [:db/login])]
+    (dispatch [:ui/keystore ks])
+    (dispatch [:ui/web3 ks])
+    (dispatch [:blockchain/my-addresses-loaded])
+    (dispatch [:reload])
+    ;; (.keyFromPassword ks (:password @login)
+    ;;                   (fn [err pw-derived-key]
+    ;;                     ;;(.log js/console err)
+    ;;                     ;;(.log js/console pw-derived-key)
+    ;;                     ;;(.log js/console (.getSeed ks pw-derived-key))
+    ;;                     ;;(.generateNewAddress ks pw-derived-key 4)
+                        
+    ;;                     ;;(.log js/console (.getAddresses ks))
+    ;;                     ;;(.log js/console (.serialize ks))
+    ;;                     ;;(set! (.-passwordProvider ks) enter-password)
+    ;;                     ;;(set-item session-storage "keystore" (:keystore res))
+    ;;                     ;;(dispatch [:ui/keystore ks])
+    ;;                     ;;(dispatch [:ui/web3 ks])
+    ;;                     ;;(dispatch [:blockchain/my-addresses-loaded])
+    ;;                     (dispatch [:reload])))
+    ;; (.createVault keystore
+    ;;               (clj->js {:password "aaa"
+    ;;                         ;; :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"
+    ;;                         })
+    ;;               (fn[err ks]
+    ;;                 (if-not (nil? err) (throw err))
+    ;;                 (.keyFromPassword ks "aaa"
+    ;;                                   (fn
+    ;;                                     [err pw-derived-key]
+    ;;                                     (if-not (nil? err)
+    ;;                                       (throw err))
+    ;;                                     (.generateNewAddress ks pw-derived-key 3)
+    ;;                                     (.log js/console (.getAddresses ks))
+    ;;                                     (.log js/console (.serialize ks))
+    ;;                                     (set! (.-passwordProvider ks) enter-password)
+    ;;                                     (set-item session-storage "keystore" (.serialize ks))
+    ;;                                     (dispatch [:ui/keystore ks])
+    ;;                                     (dispatch [:ui/web3 ks])
+    ;;                                     (dispatch [:blockchain/my-addresses-loaded])
+    ;;                                     (dispatch [:reload])
+    ;;                                    ))))
     (.log js/console res)))
 
 (defn login-component []
@@ -77,6 +156,24 @@
                                {:params          {:email    (:email @login)
                                                   :password (:password @login)}
                                 :handler         login-success-handler
+                                :response-format :json
+                                :keywords?       true
+                                :format          (url-request-format)})))
+       }]
+     [ui/raised-button
+      {:secondary    true
+       :label        "Register"
+       :style        {:margin-top 15 :margin-left 15}
+       ;;:on-touch-tap #(dispatch [:ui/login])
+       :on-touch-tap (fn []
+                       (let [page     (subscribe [:db/page])
+                             login    (subscribe [:db/login])]
+                         (.log js/console (:email @login))
+                         (.log js/console (:password @login))
+                         (POST "/register"
+                               {:params          {:email    (:email @login)
+                                                  :password (:password @login)}
+                                :handler         register-handler
                                 :response-format :json
                                 :keywords?       true
                                 :format          (url-request-format)})))

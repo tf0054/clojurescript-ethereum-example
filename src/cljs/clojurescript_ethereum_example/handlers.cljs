@@ -41,28 +41,44 @@
         :fns  [[web3-eth/accounts :blockchain/my-addresses-loaded :log-error]]}}))))
 
 (reg-event-fx
+ :reload
+ (fn [{:keys [db]} _]
+   (console :log "db:" db)
+   (let [ks       (:keystore db)
+         web3     (:web3 db)]
+     (console :log "reload:" db)
+     (merge
+      {:db         db
+       :http-xhrio {:method          :get
+                    :uri             (gstring/format "./contracts/build/%s.abi"
+                                                     (get-in db [:contract :name]))
+                    :timeout         6000
+                    :response-format (ajax/json-response-format {:keywords? true})
+                    :on-success      [:contract/abi-loaded]
+                    :on-failure      [:log-error]}}
+      {:web3-fx.blockchain/fns
+       {:web3 web3
+        :fns  [[#(:my-addresses db) :blockchain/my-addresses-loaded :log-error]]}}))))
+
+
+(reg-event-fx
  :blockchain/my-addresses-loaded
  interceptors
- (fn [{:keys [db]} [addresses]]
-   (let [ks       (:keystore db)
-         provider (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost" :transaction_signer ks}))
-         web3     (js/Web3.)]
-     (web3/set-provider web3 provider)
-     {:db (-> db
-              (assoc :my-addresses addresses)
-              (assoc-in [:new-tweet :address] (first addresses)))
-      :web3-fx.blockchain/balances
-      {:web3                   web3
-       :addresses              addresses
-       :watch?                 true
-       :blockchain-filter-opts "latest"
-       :dispatches             [:blockchain/balance-loaded :log-error]}})))
+ (fn [{:keys [db]}]
+   (console :log "my-addresses-loaded: " db)
+   {:db (-> db
+            (assoc-in [:new-tweet :address] (first (:my-addresses db))))
+    :web3-fx.blockchain/balances
+    {:web3                   (:web3 db)
+     :addresses              (:my-addresses db)
+     :watch?                 true
+     :blockchain-filter-opts "latest"
+     :dispatches             [:blockchain/balance-loaded :log-error]}}))
 
 (reg-event-fx
  :contract/abi-loaded
  interceptors
- (fn [{:keys [db]} [abi]]
-   (console :log "abi-loaded:" (get-in db [:contract :address]))
+ (fn [{:keys [db]} [abi]]   
    (if-not (nil? (:web3 db))
      (let [web3              (:web3 db)
            contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
@@ -85,7 +101,7 @@
          :db-path  [:contract :events2]
          :events   [[:on-tweet-added ;; definition name
                      {:indexed-addr (get-in db [:new-tweet :address])}
-                     ;;{}
+                     ;; {}
                      {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
         :web3-fx.contract/constant-fns

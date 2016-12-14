@@ -32,6 +32,12 @@
   [session {email :email keystore :keystore}]
   (swap! users assoc-in [email :keystore] keystore))
 
+
+(defn register
+  [session {email :email password :password keystore :keystore :as params}]
+  (swap! users assoc email params)
+  {:success true :user params})
+
 (defn json-response
   [body & more]
   (let [response {:status  200
@@ -58,6 +64,7 @@
   (resources "/images/" {:root "images"})
 
   (POST "/login" {session :session params :params} (json-response (login session params)))
+  (POST "/register" {session :session params :params} (json-response (register session params)))
 
   ;; DEALER KEY
   (GET "/key/:id/:num" [id num];; "/dealers/" isnt dealt with.

@@ -69,5 +69,7 @@
                     :key       nil}
    :login          {:email    ""
                     :password ""}
-   :keystore       nil
+   :keystore       (if-not (nil? (get-item session-storage "keystore"))
+                     (get-item session-storage "keystore")
+                     nil)
    })
