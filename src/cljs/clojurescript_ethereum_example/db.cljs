@@ -1,24 +1,57 @@
 (ns clojurescript-ethereum-example.db
   (:require
    [clojure.string :as str]
+   [hodgepodge.core :refer [session-storage get-item set-item]]
    [cljs-web3.core :as web3]))
+
+(def serialized-ks (get-item session-storage "keystore"))
+
+
+(def keystore (.-keystore js/lightwallet))
+(def deserialized-ks (if-not (nil? serialized-ks)
+                       (.deserialize keystore serialized-ks)
+                       nil))
+(defn logined?
+  []
+  (not (nil? deserialized-ks)))
+
+
+(defn generate-web3
+  [ks]
+  (let [provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost:8545" :transaction_signer ks}))
+        web3      (js/Web3.)
+        addresses (map #(str "0x" %) (js->clj (.getAddresses ks)))]
+    (web3/set-provider web3 provider)
+    web3))
+
+(def web3 (if (logined?)
+            (generate-web3 deserialized-ks)
+            nil))
+
+(def new-tweet-address (if (logined?)
+                         (first (map #(str "0x" %) (js->clj (.getAddresses deserialized-ks))))
+                         ""))
+
+(def my-addresses (if (logined?)
+                    (map #(str "0x" %) (js->clj (.getAddresses deserialized-ks)))
+                    []))
 
 (def default-db
   {:tweets         []
    :filteredTweets []
    :settings       {}
-   :my-addresses   []
+   :my-addresses   my-addresses
    :accounts       {}
    :new-tweet      {:text     ""
                     :name     ""
-                    :address  ""
+                    :address  new-tweet-address
                     :sending? false}
-   :web3           nil
+   :web3           web3
    ;; :web3           (or (aget js/window "web3")
    ;;                     (if goog.DEBUG
    ;;                       (web3/create-web3 "http://localhost:8545/")
    ;;                      (web3/create-web3 "https://morden.infura.io/metamask")))
-   :provides-web3? false
+   :provides-web3? (not (nil? web3))
    :contract       {:name     "SimpleTwitter"
                     :abi      nil
                     :bin      nil
@@ -28,7 +61,7 @@
                     :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
                     }
    :drawer         {:open false}
-   :page           3
+   :page           (if (logined?) 0 3)
    :tweetsNum      0
    :dev            {:address nil
                     :amount  0
@@ -69,7 +102,5 @@
                     :key       nil}
    :login          {:email    ""
                     :password ""}
-   :keystore       (if-not (nil? (get-item session-storage "keystore"))
-                     (get-item session-storage "keystore")
-                     nil)
+   :keystore       deserialized-ks
    })
