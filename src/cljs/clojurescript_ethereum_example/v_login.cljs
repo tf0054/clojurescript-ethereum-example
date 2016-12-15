@@ -53,6 +53,7 @@
   (let [keystore (.-keystore js/lightwallet)
         ks       (.deserialize keystore (:keystore (:user res)))
         login    (subscribe [:db/login])]
+    (set! (.-passwordProvider ks) enter-password)
     (set-item session-storage "keystore" (:keystore (:user res)))
     (dispatch [:ui/web3 ks])
     (dispatch [:blockchain/my-addresses-loaded])

@@ -15,25 +15,29 @@
   []
   (not (nil? deserialized-ks)))
 
+(def addresses (map #(str "0x" %) (if (logined?)
+                                    (js->clj (.getAddresses deserialized-ks))
+                                    [])))
 
 (defn generate-web3
   [ks]
   (let [provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost:8545" :transaction_signer ks}))
         web3      (js/Web3.)
-        addresses (map #(str "0x" %) (js->clj (.getAddresses ks)))]
+        addresses addresses]
     (web3/set-provider web3 provider)
     web3))
+
 
 (def web3 (if (logined?)
             (generate-web3 deserialized-ks)
             nil))
 
 (def new-tweet-address (if (logined?)
-                         (first (map #(str "0x" %) (js->clj (.getAddresses deserialized-ks))))
+                         (first addresses)
                          ""))
 
 (def my-addresses (if (logined?)
-                    (map #(str "0x" %) (js->clj (.getAddresses deserialized-ks)))
+                    addresses
                     []))
 
 (def default-db
