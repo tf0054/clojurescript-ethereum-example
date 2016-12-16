@@ -13,9 +13,11 @@
    [print.foo.preloads.devtools]
    [re-frame.core :as re-frame]
    [reagent.core :as reagent]
+   [dirac.runtime :as dirac]
    ))
 
 (enable-console-print!)
+(dirac/install!)
 
 (defn mount-root []
   (reagent/render [views/main-panel]

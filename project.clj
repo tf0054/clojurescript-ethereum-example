@@ -56,7 +56,14 @@
 
   :aliases {"compile-solidity" ["shell" "./compile-solidity.sh"]}
 
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  ;; :repl {
+  ;;        :repl-options {:port 8320
+  ;;                       :init (do (require 'dirac.agent)
+  ;;                                 (dirac.agent/boot!))
+  ;;                       :nrepl-middleware [dirac.nrepl/middleware
+  ;;                                          ]}
+  ;;        }
+  ;;cemerick.piggieback/wrap-cljs-repl
 
   :less {:source-paths ["resources/public/less"]
          :target-path  "resources/public/css"
@@ -67,7 +74,14 @@
   :uberjar-name "clojurescript-ethereum-example.jar"
 
   :profiles
-  {:dev
+  {:repl
+   {:repl-options {:port             8230
+                   :nrepl-middleware [dirac.nrepl/middleware]
+                   :init             (do
+                                       (require 'dirac.agent)
+                                       (dirac.agent/boot!))}}
+
+   :dev
    {:dependencies [[binaryage/devtools "0.8.2"]
                    [com.cemerick/piggieback "0.2.1"]
                    [figwheel-sidecar "0.5.8"]
