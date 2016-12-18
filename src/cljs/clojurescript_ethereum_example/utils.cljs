@@ -57,3 +57,7 @@
 (defn epochSecToDate [sec]
   (let [x (new js/Date 0)]
     (new js/Date (.setUTCSeconds x sec))) )
+
+(defn date4small [date]
+  (time-format/unparse-local (time-format/formatter-local "HH:mm:ss yyyy/MM/dd")
+                             (to-default-time-zone (to-date-time date))))

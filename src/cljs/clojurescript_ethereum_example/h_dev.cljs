@@ -55,17 +55,6 @@
    ))
 
 (reg-event-db
- :ui/AAupdate
- interceptors
- (fn [db [value]]
-   (let [val (str/lower-case (str/lower-case value))
-         ;; encStr (u/getEncrypted (get-in db [:new-tweet :address]) value)
-         ]
-     (-> db
-         (assoc-in [:dev :address] val)
-         (assoc-in [:dev :enc] val)) )))
-
-(reg-event-db
  :ui/amountNum
  interceptors
  (fn [db [x]]
@@ -171,19 +160,36 @@
      (dispatch [:dev/etherscan-loop-ping])
      (assoc-in db [:monitor :rtc :conn] ch)))
 
+(reg-event-db
+ :dev/update-latest
+ interceptors
+ (fn [db [x]]
+   (assoc-in db [:monitor :latest-block] (:num x))))
+
 (defn filterIds [db x]
-  (if (not-every? false?
-                  (map #(= x %) (get-in db [:monitor :targets])))
-    true false) )
+   (not-every? false?
+                 (map #(= x %) (get-in db [:monitor :targets]))) )
 
 (reg-event-db
  :dev/etherscan-update
  interceptors
  (fn [db [id x]]
-   (console :log "start-test-update" id)
+   (dispatch [:dev/update-latest x])
    (if (filterIds db id)
-     (assoc-in db [:monitor :found (keyword id)] x)
-     (do (console :log "Ignored Tx:" id)
+     (do (console :log "etherscan-update" id)
+         (let [q (get-in db [:monitor :found (keyword id)])]
+           (if (every? false?
+                           (map #(= (:hash %) (:hash x)) q))
+             (-> db
+                 (assoc-in [:monitor :found (keyword id)] (if (< (count q) 3)
+                                                            (conj q x)
+                                                            (conj (pop q) x) ))
+                 (assoc-in [:monitor :txhash] (:hash x))
+                 )
+             (do
+               (console :log "dup:" (:hash x))
+               db))))
+     (do (console :log "etherscan-update" id "(Ignored)")
          db))
    ))
 
@@ -229,7 +235,7 @@
                          (connectTx strUrl regObj))) )
     stompClient))
 
- (defn callbackTx [msg]
+(defn callbackTx [msg]
   (let [w (.-body msg)
         y (js->clj (.parse js/JSON w)
                    :keywordize-keys true)]
@@ -247,6 +253,34 @@
      (-> db
          ;; reset monitor lists with target addresses
          (assoc-in [:monitor :found]
-                   (reduce merge (map #(hash-map (keyword %) {:to %})
+                   (reduce merge (map #(hash-map (keyword %)
+                                                 cljs.core/PersistentQueue.EMPTY
+                                                 ;;{:to %}
+                                                 )
                                       (get-in db [:monitor :targets]) )) )
          (assoc-in [:monitor :conn] stompClient)) )))
+
+(reg-event-db
+ :dev/tmp-target
+ interceptors
+ (fn [db [value]]
+   (let [val (str/lower-case (str/lower-case value))]
+         (assoc-in db [:monitor :tmp] val))))
+
+(reg-event-db
+ :dev/add-target
+ interceptors
+ (fn [db _]
+   (let [targets (get-in db [:monitor :targets])
+         tmp (get-in db [:monitor :tmp])]
+     (if (not (> (.indexOf targets tmp) -1))
+       (-> db
+           (assoc-in [:monitor :targets] (conj
+                                          (get-in db [:monitor :targets])
+                                          (get-in db [:monitor :tmp])))
+           (assoc-in [:monitor :found (keyword tmp)]
+                     cljs.core/PersistentQueue.EMPTY)
+           (assoc-in [:monitor :tmp] "")) 
+       db
+       ))
+   ))
