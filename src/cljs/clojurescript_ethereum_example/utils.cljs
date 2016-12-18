@@ -61,3 +61,7 @@
 (defn date4small [date]
   (time-format/unparse-local (time-format/formatter-local "HH:mm:ss yyyy/MM/dd")
                              (to-default-time-zone (to-date-time date))))
+
+(defn date4plotly [date]
+  (time-format/unparse-local (time-format/formatter-local "yyyy-MM-dd HH:mm:ss")
+                             (to-default-time-zone (to-date-time date))))

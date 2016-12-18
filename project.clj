@@ -31,6 +31,7 @@
                  [com.taoensso/timbre "4.7.4"]
                  [jarohen/chord "0.7.0"
                   :exclusions [commons-codec org.clojure/core.async]]
+                 [cljsjs/plotly "1.17.3-0"]
                  [binaryage/dirac "RELEASE"]
                  ]
 
@@ -100,7 +101,7 @@
    :uberjar {:hooks       [leiningen.cljsbuild]
              :omit-source true
              :aot         :all
-             :main        emojillionaire.core
+             :main        clojurescript-ethereum-example.core
              :cljsbuild   {:builds {:app {:id           "uberjar"
                                           :source-paths ["src/cljs"]
                                           :compiler     {:main            clojurescript-ethereum-example.core
