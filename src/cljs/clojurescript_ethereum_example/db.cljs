@@ -62,6 +62,11 @@
                     ;; :address  "0x1a962b69f59b6879a0c25874aa86f8f2658aa368"
                     ;; :address  "0x7B51E82Cbeed5732845CFDFe58CFE9099a61d5De"
 
+                    ;; Recruit  0x3c26ab7c9795d0d0507c05f7d6b1f13fe1f56827
+                    ;; Dealer   0x1c90b30e6fa89fe54801989b17dc8d985f2a2e81
+                    ;; Dealer2  0x56fcc45350aaf6abbb555ee32cc4324f25485e32
+                    ;; Customer 0xabc24d2e0db6b3b1b548488d6d4d4264e652bc11
+                    
                     :address  "0x717579347713f18c2e874b2679bb48625626a554" ;; 多分これ
                     ;; :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
                     }
