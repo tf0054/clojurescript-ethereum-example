@@ -40,11 +40,17 @@
   (reader/read-string (b64/decodeString dec))  
   )
 
-(defn getEncrypted [key value] 
+(defn getEncrypted [key value]
+  (.log js/console "getEncrypted")
+  (.log js/console "key:" key)
+  (.log js/console "key:" key)
   (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
     (getFakeEnc (se/encrypt-with kdf value
                                  {:kdf-iterations 9000}))))
 
 (defn getDecrypted [key evalue] 
+  (.log js/console "getDecrypted")
+  (.log js/console "key:" key)
+  (.log js/console "key:" key)
   (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
     (se/decrypt-with kdf (getFakeDec evalue))))

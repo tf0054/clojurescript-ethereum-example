@@ -45,19 +45,24 @@
 
 
 (defn login-success-handler [res]
-  (dispatch [:ui/login])
-  (.log js/console res)
+  (.log js/console (clj->js res))
+  (.log js/console (true? (:success res)))
   (.log js/console (:keystore (:user res)))
   (.log js/console (.parse js/JSON (:keystore (:user res))))
-  (let [keystore (.-keystore js/lightwallet)
-        ks       (.deserialize keystore (:keystore (:user res)))
-        login    (subscribe [:db/login])]
-    (set! (.-passwordProvider ks) enter-password)
-    (set-item session-storage "keystore" (:keystore (:user res)))
-    (dispatch [:ui/web3 ks])
-    (dispatch [:blockchain/my-addresses-loaded])
-    (dispatch [:reload])
-    (.log js/console res)))
+  (if (true? (:success res))
+    (do
+      (dispatch [:ui/login])
+      (let [keystore (.-keystore js/lightwallet)
+            ks       (.deserialize keystore (:keystore (:user res)))
+            login    (subscribe [:db/login])]
+        (set! (.-passwordProvider ks) enter-password)
+        (set-item session-storage "keystore" (:keystore (:user res)))
+        (dispatch [:ui/web3 ks])
+        (dispatch [:blockchain/my-addresses-loaded])
+        (dispatch [:reload])
+        (.log js/console res))
+      )
+    (js/alert "login failed. please check email or password.")))
 
 (defn login-component []
   [row

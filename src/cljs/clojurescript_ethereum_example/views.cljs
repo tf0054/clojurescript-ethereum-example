@@ -29,6 +29,10 @@
        [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 1])
                                      (dispatch [:ui/drawer]))} "development"]
+       [ui/menu-item {:onTouchTap #(do
+                                     (dispatch [:ui/page 3])
+                                     (dispatch [:ui/logout])
+                                     (dispatch [:ui/drawer]))} "logout"]
        ]
       )
     )

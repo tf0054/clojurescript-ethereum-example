@@ -113,15 +113,9 @@
  interceptors
  (fn [db [tweet]]
    (console :log "contract/on-tweet-loaded:" (.toNumber (:tweet-key tweet)) tweet)
-   ;;(dispatch [:server/fetch-key (get-in db [:new-tweet :address]) "xx" false])
    (update db :tweets conj (merge (select-keys tweet [:author-address :text :name])
                                   {:date      (u/big-number->date-time (:date tweet))
-                                   :tweet-key (.toNumber (:tweet-key tweet))}))
-   ;; (update db :tweets conj (merge (select-keys tweet [:author-address :name])
-   ;;                                {:text      (u/getDecrypted (:tmp-key db) (:text tweet))
-   ;;                                 :date      (u/big-number->date-time (:date tweet))
-   ;;                                 :tweet-key (.toNumber (:tweet-key tweet))}))
-   ))
+                                   :tweet-key (.toNumber (:tweet-key tweet))}))))
 
 (reg-event-db
  :contract/settings-loaded

@@ -22,8 +22,7 @@
 (defn generate-web3
   [ks]
   (let [provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost:8545" :transaction_signer ks}))
-        web3      (js/Web3.)
-        addresses addresses]
+        web3      (js/Web3.)]
     (web3/set-provider web3 provider)
     web3))
 

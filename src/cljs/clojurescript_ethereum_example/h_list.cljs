@@ -62,7 +62,8 @@
        :db-path  [:contract :send-tweet]
        :fn       [:add-tweet (str/lower-case (get-in db [:enquiry :dealer])) strEnc
                   {:from address
-                   :gas  tweet-gas-limit}
+                   :gas  tweet-gas-limit
+                   :gasPrice 20000000000}
                   :enquiry/received
                   :log-error
                   :enquiry/transaction-receipt-loaded]}

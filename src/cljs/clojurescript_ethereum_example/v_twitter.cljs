@@ -2,7 +2,6 @@
   (:require
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
-   ;; [clojurescript-ethereum-example.address-select-field :refer [address-select-field]]
    [cljs-react-material-ui.reagent :as ui]
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
    [clojurescript-ethereum-example.utils :as u]))
@@ -21,11 +20,8 @@
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
         [ui/paper {:style {:margin-top "15px"
-                           :padding    20
-                           ;;:padding    "0 20px 20px"
-                           }}
+                           :padding    20}}
          [:h2 "Connection"]
-
          [ui/text-field {:value               (:address @new-tweet)
                          :disabled            true
                          :name                "MyAddr"
@@ -33,38 +29,17 @@
                          :style               {:width "100%"}}]
          [:br]
          [:h3 "Balance: " (u/eth @balance)]
-         ;;[:br]
-
          [ui/text-field {:default-value       @caddr
                          :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
                          :name                "ContractAddr"
-                         ;; :max-length       (:max-tweet-length @settings)
                          :floating-label-text "Where is your contract at?"
                          :style               {:width "100%"}}]
          [:br]
-         ;; [:h3 "Current contract address: " @caddr]
          [ui/raised-button
           {:secondary    true
-           ;; :disabled     (or (empty? (:text @new-tweet))
-           ;;                   (empty? (:name @new-tweet))
-           ;;                   (empty? (:address @new-tweet))
-           ;;                   (:sending? @new-tweet))
            :label        "Update addr"
            :style        {:margin-top 15}
-           :on-touch-tap ;; # (dispatch [:ui/cInstUpdate])
-           #(dispatch [:contract/abi-loaded @abi])
-           }]
-         ;; [ui/raised-button
-         ;;  {:secondary    true
-         ;;   :disabled     (or (empty? (:text @new-tweet))
-         ;;                     (empty? (:name @new-tweet))
-         ;;                     (empty? (:address @new-tweet))
-         ;;                     (:sending? @new-tweet))
-         ;;   :label        "Tweet"
-         ;;   :style        {:margin-top 15}
-         ;;   :on-touch-tap #(dispatch [:new-tweet/send])
-         ;;   }]]
-         ]]])))
+           :on-touch-tap #(dispatch [:contract/abi-loaded @abi])}]]]])))
 
 (defn tweets-component []
   (let [tweets  (subscribe [:db/tweets])
@@ -88,6 +63,4 @@
           {:secondary    true
            :label        "decode msg"
            :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:server/fetch-key (first @myaddrs) "xx" false])
-           }]
-         ]]])))
+           :on-touch-tap #(dispatch [:server/fetch-key (first @myaddrs) false])}]]]])))

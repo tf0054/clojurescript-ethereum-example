@@ -14,6 +14,7 @@
    [goog.string :as gstring]
    [goog.string.format]
    [madvas.re-frame.web3-fx]
+   [hodgepodge.core :refer [session-storage remove-item]]
    [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
    [clojurescript-ethereum-example.utils :as u]
    )
@@ -65,6 +66,14 @@
    (assoc db :page 0)))
 
 (reg-event-db
+ :ui/logout
+ interceptors
+ (fn [db]
+   (remove-item session-storage "keystore")
+   (assoc db :page 3)))
+
+
+(reg-event-db
  :ui/web3
  interceptors
  (fn [db [ks]]
@@ -77,7 +86,6 @@
          (assoc :keystore ks)
          (assoc :my-addresses addresses)
          (assoc :web3 web3)
-         ;;(assoc-in [:new-tweet :address] (first addresses))
          (assoc :provides-web3? true)))) )
 
 
@@ -91,29 +99,16 @@
          addr      (get-in db [:contract :address])
          cinstance (web3-eth/contract-at web3 abi addr)]
      (println cinstance)
-     {:db (assoc-in db [:contract :instance] cinstance)}
-     )
-   ))
+     {:db (assoc-in db [:contract :instance] cinstance)})))
 
 (reg-event-db
  :ui/AAupdate
  interceptors
  (fn [db [value]]
-   (let [val (str/lower-case (str/lower-case value))
-         ;; encStr (u/getEncrypted (get-in db [:new-tweet :address]) value)
-         ]
+   (let [val (str/lower-case (str/lower-case value))]
      (-> db
          (assoc-in [:dev :address] val)
-         (assoc-in [:dev :enc]
-                   val
-                   ;; (str encStr "^ "
-                   ;;      (u/getDecrypted
-                   ;;       ;;(get-in db [:new-tweet :address])
-                   ;;       "tf0054"
-                   ;;       encStr) "^ "
-                   ;;      (get-in db [:new-tweet :address])
-                   ;;      )
-                   )))))
+         (assoc-in [:dev :enc] val)))))
 
 (reg-event-db
  :ui/amountNum

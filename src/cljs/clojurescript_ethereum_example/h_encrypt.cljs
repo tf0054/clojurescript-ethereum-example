@@ -14,9 +14,7 @@
    [goog.string.format]
    [madvas.re-frame.web3-fx]
    [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
-   [clojurescript-ethereum-example.utils :as u]
-   )
-  )
+   [clojurescript-ethereum-example.utils :as u]))
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])
@@ -26,10 +24,10 @@
 (reg-event-fx
  :server/fetch-key
  interceptors
- (fn [{:keys [db]} [dealer id customer?]]
-   (console :log "fetch:" dealer id)
+ (fn [{:keys [db]} [dealer customer?]]
+   (console :log "fetch:" dealer)
    {:http-xhrio {:method          :get
-                 :uri             (str "/key/" dealer "/" id)
+                 :uri             (str "/key/" dealer)
                  :timeout         6000
                  :response-format (ajax/json-response-format {:keywords? true})
                  :on-success      (if customer?
@@ -48,11 +46,12 @@
 (reg-event-db
  :dealer-key-result
  (fn [db [_ result]]
+   (console :log "result:" (clj->js result)) 
    (console :log "http-d-result(KEY):" (if-let [x (:key result)]
                                          x
                                          "cannot find!")) 
    (assoc-in db [:tweets] (into [] (map (fn [x]
-                                          ;; (console :log "mapped:" x)
+                                          (console :log "mapped:" (clj->js x))
                                           (merge (dissoc x :text)
                                                  (if (> (.-length (:text x)) 40) ;; NOT GOOD
                                                    (let [rawHash
@@ -62,11 +61,6 @@
                                                      {:text [ui/paper {:style {:padding "5px 10px 10px"}}
                                                              [:div "CAR_NAME: " (:name rawHash)]
                                                              [:div "PRICE: " (:price rawHash)]
-                                                             [:div "MESSAGE: "  (:text rawHash)]
-                                                             ]})
-                                                   {:text (:text x)}
-                                                   )
-                                                 ))
-                                        (:tweets db) )))
-
-   ))
+                                                             [:div "MESSAGE: "  (:text rawHash)]]})
+                                                   {:text (:text x)})))
+                                        (:tweets db))))))
