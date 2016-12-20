@@ -1,7 +1,9 @@
 (ns clojurescript-ethereum-example.handlers
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require
    [clojure.string :as str]
    [cljs.reader :as reader]
+   [cljs.core.async :as async :refer [>! <! put! timeout chan]]
    [ajax.core :as ajax]
    [cljs-web3.core :as web3]
    [cljs-web3.eth :as web3-eth]
@@ -71,10 +73,13 @@
    (console :log "name:" name)
    (console :log "address:" address)
    (console :log "is-payed:" is-payed)
-   {:db (-> db
-            (assoc :tweets [])
-            (assoc :tweetsNum 0))}))
-
+   (let [contract (get-in db [:contract :instance])]
+     (doseq [x (range 0 enquiry-count)]
+         (.getDealerEnquiry contract address x (fn [err [from to message date]]
+                                                   (console :log "enquiry" (clj->js {:from from :to to :message message :date (js/Date. (* (.toNumber date) 1000))})))))
+     {:db (-> db
+              (assoc :tweets [])
+              (assoc :tweetsNum 0))})))
 
 (reg-event-fx
  :blockchain/my-addresses-loaded
@@ -103,28 +108,9 @@
                                  (assoc-in [:contract :instance] contract-instance)
                                  (assoc-in [:tweets] nil))]
        {:db db
-        ;; :web3-fx.contract/events
-        ;; {:instance contract-instance
-        ;;  :db       db
-        ;;  :db-path  [:contract :events]
-        ;;  :events   [[:on-tweet-added
-        ;;              {}
-        ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
-
-        ;; :web3-fx.contract/events
-        ;; {:instance contract-instance
-        ;;  :db       db
-        ;;  :db-path  [:contract :events2]
-        ;;  :events   [[:on-tweet-added ;; definition name
-        ;;              ;; {:indexed-addr (get-in db [:new-tweet :address])}
-        ;;              {}
-        ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
-
         :web3-fx.contract/constant-fns
         {:instance contract-instance
-         :fns      [
-                    ;; [:get-settings :contract/settings-loaded :log-error]
-                    [:get-dealer (:address (:new-tweet db)) :contract/get-enquiries :log-error]]}}))))
+         :fns      [[:get-dealer (:address (:new-tweet db)) :contract/get-enquiries :log-error]]}}))))
 
 (reg-event-db
  :contract/on-tweet-loaded
@@ -147,12 +133,6 @@
  interceptors
  (fn [db [balance address]]
    (assoc-in db [:accounts address :balance] balance)))
-
-#_(reg-event-fx
- :get-dealer
- interceptors
- (fn [db [err dealer]]
-   (console :log "dealer:" dealer)))
 
 (reg-event-db
  :new-tweet/update
