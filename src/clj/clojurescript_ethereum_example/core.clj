@@ -6,6 +6,7 @@
             [ring.middleware.gzip :refer [wrap-gzip]]
             [ring.middleware.logger :refer [wrap-with-logger]]
             [ring.middleware.json :refer [wrap-json-params]]
+            [ring.middleware.transit :refer [wrap-transit-params]]
             [environ.core :refer [env]]
             [cheshire.core :as json]
             [org.httpkit.server :refer [run-server]])
@@ -13,8 +14,7 @@
 
 (def ^:dynamic *server*)
 
-(def users (atom {"a@a.a" {:email "a@a.a" :password "password" :key-store nil}
-                  "b@b.b" {:email "b@b.b" :password "password" :key-store nil}}))
+(def users (atom {}))
 
 (defn login-ok?
   [email password]
@@ -100,6 +100,7 @@
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
       wrap-with-logger
       wrap-json-params
+      (wrap-transit-params {:opts{}})
       wrap-gzip))
 
 (defn -main [& [port]]

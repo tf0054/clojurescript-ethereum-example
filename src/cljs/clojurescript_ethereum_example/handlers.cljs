@@ -100,8 +100,8 @@
          :db       db
          :db-path  [:contract :events2]
          :events   [[:on-tweet-added ;; definition name
-                     {:indexed-addr (get-in db [:new-tweet :address])}
-                     ;; {}
+                     ;; {:indexed-addr (get-in db [:new-tweet :address])}
+                     {}
                      {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
         :web3-fx.contract/constant-fns

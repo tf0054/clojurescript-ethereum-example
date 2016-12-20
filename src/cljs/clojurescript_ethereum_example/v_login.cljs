@@ -35,8 +35,7 @@
                                                  :keystore (.serialize ks)}
                                :handler         (fn [res] (.log js/console res))
                                :response-format :json
-                               :keywords?       true
-                               :format          (url-request-format)})))))
+                               :keywords?       true})))))
 (defn register-handler
   []
   (let [login    (subscribe [:db/login])
@@ -58,42 +57,6 @@
     (dispatch [:ui/web3 ks])
     (dispatch [:blockchain/my-addresses-loaded])
     (dispatch [:reload])
-    ;; (.keyFromPassword ks (:password @login)
-    ;;                   (fn [err pw-derived-key]
-    ;;                     ;;(.log js/console err)
-    ;;                     ;;(.log js/console pw-derived-key)
-    ;;                     ;;(.log js/console (.getSeed ks pw-derived-key))
-    ;;                     ;;(.generateNewAddress ks pw-derived-key 4)
-
-    ;;                     ;;(.log js/console (.getAddresses ks))
-    ;;                     ;;(.log js/console (.serialize ks))
-    ;;                     ;;(set! (.-passwordProvider ks) enter-password)
-    ;;                     ;;(set-item session-storage "keystore" (:keystore res))
-    ;;                     ;;(dispatch [:ui/keystore ks])
-    ;;                     ;;(dispatch [:ui/web3 ks])
-    ;;                     ;;(dispatch [:blockchain/my-addresses-loaded])
-    ;;                     (dispatch [:reload])))
-    ;; (.createVault keystore
-    ;;               (clj->js {:password "aaa"
-    ;;                         ;; :sheedPhrase "else victory timber thought refuse erosion club oak enact turkey scan garment"
-    ;;                         })
-    ;;               (fn[err ks]
-    ;;                 (if-not (nil? err) (throw err))
-    ;;                 (.keyFromPassword ks "aaa"
-    ;;                                   (fn
-    ;;                                     [err pw-derived-key]
-    ;;                                     (if-not (nil? err)
-    ;;                                       (throw err))
-    ;;                                     (.generateNewAddress ks pw-derived-key 3)
-    ;;                                     (.log js/console (.getAddresses ks))
-    ;;                                     (.log js/console (.serialize ks))
-    ;;                                     (set! (.-passwordProvider ks) enter-password)
-    ;;                                     (set-item session-storage "keystore" (.serialize ks))
-    ;;                                     (dispatch [:ui/keystore ks])
-    ;;                                     (dispatch [:ui/web3 ks])
-    ;;                                     (dispatch [:blockchain/my-addresses-loaded])
-    ;;                                     (dispatch [:reload])
-    ;;                                    ))))
     (.log js/console res)))
 
 (defn login-component []
@@ -132,8 +95,7 @@
                                                   :password (:password @login)}
                                 :handler         login-success-handler
                                 :response-format :json
-                                :keywords?       true
-                                :format          (url-request-format)})))
+                                :keywords?       true})))
        }]
      [ui/raised-button
       {:secondary    true
@@ -145,11 +107,5 @@
                              login    (subscribe [:db/login])]
                          (.log js/console (:email @login))
                          (.log js/console (:password @login))
-                         (POST "/register"
-                               {:params          {:email    (:email @login)
-                                                  :password (:password @login)}
-                                :handler         register-handler
-                                :response-format :json
-                                :keywords?       true
-                                :format          (url-request-format)})))
+                         (register-handler)))
        }]]]])
