@@ -55,13 +55,15 @@
    ;;                       (web3/create-web3 "http://localhost:8545/")
    ;;                      (web3/create-web3 "https://morden.infura.io/metamask")))
    :provides-web3? (not (nil? web3))
-   :contract       {:name     "SimpleTwitter"
+   :contract       {:name     "carsensor"
                     :abi      nil
                     :bin      nil
                     :instance nil
                     ;; :address  "0x1a962b69f59b6879a0c25874aa86f8f2658aa368"
                     ;; :address  "0x7B51E82Cbeed5732845CFDFe58CFE9099a61d5De"
-                    :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
+
+                    :address  "0x717579347713f18c2e874b2679bb48625626a554" ;; 多分これ
+                    ;; :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
                     }
    :drawer         {:open false}
    :page           (if (logined?) 0 3)
