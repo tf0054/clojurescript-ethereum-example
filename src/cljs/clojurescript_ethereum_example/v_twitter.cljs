@@ -22,7 +22,9 @@
         [ui/paper {:style {:margin-top "15px"
                            :padding    20}}
          [:h2 "Connection"]
-         [ui/text-field {:value               (:address @new-tweet)
+         [ui/text-field {:value               (if-not (nil? (:address @new-tweet))
+                                                (:address @new-tweet)
+                                                "")
                          :disabled            true
                          :name                "MyAddr"
                          :floating-label-text "Your account (address)"

@@ -14,7 +14,10 @@
   (let [enquiry (subscribe [:db/enquiry])]
     (fn []
       [ui/dialog {;; :title "test dialog"
-                  :open  (:open @enquiry)
+                  :open (if-not (nil? (:open @enquiry))
+                          (:open @enquiry)
+                          false) 
+                  ;; :open false
                   :modal true}
        (:lead-text @enquiry)
        [ui/text-field {:default-value       "test" ;;(:name @new-tweet)

@@ -26,6 +26,7 @@
 (reg-event-fx
  :initialize
  (fn [_ _]
+   (console :log "initialize")
    (merge
     {:db         db/default-db
      :http-xhrio {:method          :get
@@ -45,20 +46,34 @@
  (fn [{:keys [db]} _]
    (console :log "db:" db)
    (let [ks       (:keystore db)
-         web3     (:web3 db)]
-     (console :log "reload:" db)
+         web3     (:web3 db)
+         address  (:address (:new-tweet db))]
+     (console :log "reload:" (clj->js db))
      (merge
       {:db         db
        :http-xhrio {:method          :get
                     :uri             (gstring/format "./contracts/build/%s.abi"
-                                                     (get-in db [:contract :name]))
+                                                     (get-in db/default-db [:contract :name]))
                     :timeout         6000
                     :response-format (ajax/json-response-format {:keywords? true})
                     :on-success      [:contract/abi-loaded]
                     :on-failure      [:log-error]}}
-      {:web3-fx.blockchain/fns
-       {:web3 web3
-        :fns  [[#(:my-addresses db) :blockchain/my-addresses-loaded :log-error]]}}))))
+      {:web3-fx.blockchain/fns {:web3 web3
+                                :fns  [[#(:my-addresses db) :blockchain/my-addresses-loaded :log-error]]}
+       ;;:web3-fx.contract/fns   {:fns [[contract :get-dealer address :get-enquiries :log-error]]}
+       }))))
+
+(reg-event-fx
+ :contract/get-enquiries
+ interceptors
+ (fn [{:keys [db]} [[enquiry-count name address is-payed payed-amount]]]
+   (console :log "enquiry-count:" enquiry-count)
+   (console :log "name:" name)
+   (console :log "address:" address)
+   (console :log "is-payed:" is-payed)
+   {:db (-> db
+            (assoc :tweets [])
+            (assoc :tweetsNum 0))}))
 
 
 (reg-event-fx
@@ -78,7 +93,8 @@
 (reg-event-fx
  :contract/abi-loaded
  interceptors
- (fn [{:keys [db]} [abi]]   
+ (fn [{:keys [db]} [abi]]
+   (console :log "abi-loaded" db)
    (if-not (nil? (:web3 db))
      (let [web3              (:web3 db)
            contract-instance (web3-eth/contract-at web3 abi (:address (:contract db)))
@@ -95,18 +111,20 @@
         ;;              {}
         ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
-        :web3-fx.contract/events
-        {:instance contract-instance
-         :db       db
-         :db-path  [:contract :events2]
-         :events   [[:on-tweet-added ;; definition name
-                     ;; {:indexed-addr (get-in db [:new-tweet :address])}
-                     {}
-                     {:from-block 0} :contract/on-tweet-loaded :log-error]]}
+        ;; :web3-fx.contract/events
+        ;; {:instance contract-instance
+        ;;  :db       db
+        ;;  :db-path  [:contract :events2]
+        ;;  :events   [[:on-tweet-added ;; definition name
+        ;;              ;; {:indexed-addr (get-in db [:new-tweet :address])}
+        ;;              {}
+        ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
 
         :web3-fx.contract/constant-fns
         {:instance contract-instance
-         :fns      [[:get-settings :contract/settings-loaded :log-error]]}}))))
+         :fns      [
+                    ;; [:get-settings :contract/settings-loaded :log-error]
+                    [:get-dealer (:address (:new-tweet db)) :contract/get-enquiries :log-error]]}}))))
 
 (reg-event-db
  :contract/on-tweet-loaded
@@ -129,6 +147,12 @@
  interceptors
  (fn [db [balance address]]
    (assoc-in db [:accounts address :balance] balance)))
+
+#_(reg-event-fx
+ :get-dealer
+ interceptors
+ (fn [db [err dealer]]
+   (console :log "dealer:" dealer)))
 
 (reg-event-db
  :new-tweet/update
