@@ -61,25 +61,82 @@
                     :on-success      [:contract/abi-loaded]
                     :on-failure      [:log-error]}}
       {:web3-fx.blockchain/fns {:web3 web3
-                                :fns  [[#(:my-addresses db) :blockchain/my-addresses-loaded :log-error]]}
-       ;;:web3-fx.contract/fns   {:fns [[contract :get-dealer address :get-enquiries :log-error]]}
+                                :fns  [[#(:my-addresses db)
+                                        :blockchain/my-addresses-loaded
+                                        :log-error]]}
        }))))
 
 (reg-event-fx
- :contract/get-enquiries
+ :contract/get-dealer
  interceptors
  (fn [{:keys [db]} [[enquiry-count name address is-payed payed-amount]]]
-   (console :log "enquiry-count:" enquiry-count)
+   (console :log "enquiry-count:" (.toNumber enquiry-count))
    (console :log "name:" name)
    (console :log "address:" address)
    (console :log "is-payed:" is-payed)
    (let [contract (get-in db [:contract :instance])]
-     (doseq [x (range 0 enquiry-count)]
+     #_(doseq [x (range 0 enquiry-count)]
          (.getDealerEnquiry contract address x (fn [err [from to message date]]
-                                                   (console :log "enquiry" (clj->js {:from from :to to :message message :date (js/Date. (* (.toNumber date) 1000))})))))
-     {:db (-> db
-              (assoc :tweets [])
-              (assoc :tweetsNum 0))})))
+                                                 (console :log "enquiry" (clj->js {:from from :to to :message message :date (js/Date. (* (.toNumber date) 1000))})))))
+     {:db       (-> db
+                    (assoc :payed  is-payed)
+                    (assoc :tweets (into [] (for [x (range 0 (.toNumber enquiry-count))] nil)))
+                    (assoc :tweetsNum 0))
+      :dispatch [:contract/get-enquiries [address (.toNumber enquiry-count)]]})))
+
+(reg-event-fx
+ :publication-fee/pay
+ interceptors
+ (fn [{:keys [db]} []]
+   (console :log ":publication-fee/pay")
+   (console :log ":publication-fee/pay db: " db)
+   (let [web3         (:web3 db)
+         from         (get-in db [:new-tweet :address])
+         to           (:address (:contract db))
+         value        (.toWei (:web3 db) 0.01)
+         tx           {:from from
+                       :to to
+                       :value value
+                       :gasPrice (web3-eth/gas-price web3)}
+         gas          (web3-eth/estimate-gas web3 tx)]
+     ;; a json with id.. would be a encrypted sencente. 
+     (console :log "send transaction:" (clj->js (assoc tx :gas gas)))
+     (web3-eth/send-transaction! web3 (assoc tx :gas gas) (fn [err tx]
+                                                            (console :log "err:" err)
+                                                            (console :log "tx:" tx)
+                                                            (dispatch [:reload])))
+     ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
+     {:db db})))
+
+(reg-event-db
+ :contract/get-enquiries
+ interceptors
+ (fn [db [[address enquiry-count]]]
+   (console :log ":contract/get-enquiries")
+   (console :log "address:" address)
+   (console :log "enquiry-count:" enquiry-count)
+   (console :log ":contract/get-enquiries db" (clj->js db))
+   (doseq [x (range 0 enquiry-count)]
+     (console :log "loop:" x)
+     (.getDealerEnquiry (get-in db [:contract :instance])
+                        address
+                        x
+                        (fn [err [from to message date]]
+                          (let [enquiry {:from from
+                                         :to to
+                                         :message message
+                                         :date (js/Date. (.toNumber date))}]
+                            (console :log "enquiry" (clj->js enquiry))
+                            (dispatch [:contract/get-enquiry x enquiry])))))
+   db))
+
+(reg-event-db
+ :contract/get-enquiry
+ interceptors
+ (fn [db [index enquiry]]
+   (console :log ":contract/get-enquiry")
+   (console :log (assoc-in db [:tweets index] enquiry))
+   (assoc-in db [:tweets index] enquiry)))
 
 (reg-event-fx
  :blockchain/my-addresses-loaded
@@ -110,7 +167,7 @@
        {:db db
         :web3-fx.contract/constant-fns
         {:instance contract-instance
-         :fns      [[:get-dealer (:address (:new-tweet db)) :contract/get-enquiries :log-error]]}}))))
+         :fns      [[:get-dealer (:address (:new-tweet db)) :contract/get-dealer :log-error]]}}))))
 
 (reg-event-db
  :contract/on-tweet-loaded
@@ -252,6 +309,8 @@
  (fn [db [x]]
    (console :log "hendler:ui/page" (get-in db [:page]) "->" x)
    (if-not (nil? (:keystore db))
-     (assoc-in db [:page] x)
+     (do
+       (dispatch [:reload])
+       (assoc-in db [:page] x))
      (assoc-in db [:page] 3) ;; jump to login
      )))

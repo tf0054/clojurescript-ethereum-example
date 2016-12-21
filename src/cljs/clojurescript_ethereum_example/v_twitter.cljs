@@ -15,7 +15,8 @@
         settings     (subscribe [:db/settings])
         new-tweet    (subscribe [:db/new-tweet])
         my-addresses (subscribe [:db/my-addresses])
-        balance      (subscribe [:new-tweet/selected-address-balance])]
+        balance      (subscribe [:new-tweet/selected-address-balance])
+        payed        (subscribe [:db/payed])]
     (fn []
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
@@ -31,6 +32,7 @@
                          :style               {:width "100%"}}]
          [:br]
          [:h3 "Balance: " (u/eth @balance)]
+         [:h3 "Paied: " (if @payed "you are already paied." "you are not paied.")]
          [ui/text-field {:default-value       @caddr
                          :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
                          :name                "ContractAddr"
@@ -41,7 +43,14 @@
           {:secondary    true
            :label        "Update addr"
            :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:contract/abi-loaded @abi])}]]]])))
+           :on-touch-tap #(dispatch [:contract/abi-loaded @abi])}]
+         [ui/raised-button
+          {:primary      true
+           :label        "Pay the publication fee"
+           :style        {:margin-top 15
+                          :margin-left 15}
+           :on-touch-tap #(dispatch [:publication-fee/pay])
+           }]]]])))
 
 (defn tweets-component []
   (let [tweets  (subscribe [:db/tweets])
@@ -51,15 +60,15 @@
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
         [ui/paper {:style {:padding 20 :margin-top 20}}
          [:h2 "Messages"]
-         (for [{:keys [tweet-key name text date author-address]} @tweets]
+         (for [{:keys [tweet-key to message date from]} (filter #(not (nil? %)) @tweets)]
            [:div {:style {:margin-top 20}
-                  :key   tweet-key}
+                  :key   date}
             [:h5 [:i "Date: "(u/format-date date)]]
-            [:h5 [:i "Tx: " author-address " -> " name]]
+            [:h5 [:i "Tx: " from " -> " to]]
             [:div {:style {:margin-top 5
                            :word-break "break-all"}
                    :width 500}
-             text]
+             message]
             [ui/divider {:style {:margin-top 5}}]])
          [ui/raised-button
           {:secondary    true

@@ -95,3 +95,13 @@
  :db/keystore
  (fn [db]
    (:keystore db)))
+
+(reg-sub
+ :db/type
+ (fn [db]
+   (:type db)))
+
+(reg-sub
+ :db/payed
+ (fn [db]
+   (:payed db)))

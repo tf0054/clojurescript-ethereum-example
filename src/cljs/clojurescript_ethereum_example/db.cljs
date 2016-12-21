@@ -82,22 +82,22 @@
                      :name   "Fiat punto"
                      :price  1000000
                      :image  "/images/car001.jpg"
-                     :dealer (str/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")}
+                     :dealer (str/lower-case "0x1c90b30e6fa89fe54801989b17dc8d985f2a2e81")}
                     {:id     "car002"
                      :name   "Fiat punto"
                      :price  2000000
                      :image  "/images/car002.jpg"
-                     :dealer (str/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")}
+                     :dealer (str/lower-case "0x1c90b30e6fa89fe54801989b17dc8d985f2a2e81")}
                     {:id     "car003"
                      :name   "Fiat punto"
                      :price  3000000
                      :image  "/images/car003.jpg"
-                     :dealer (str/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")}
+                     :dealer (str/lower-case "0x56fcc45350aaf6abbb555ee32cc4324f25485e32")}
                     {:id     "car004"
                      :name   "Fiat punto"
                      :price  4000000
                      :image  "/images/car004.jpg"
-                     :dealer (str/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")}
+                     :dealer (str/lower-case "0x56fcc45350aaf6abbb555ee32cc4324f25485e32")}
                     ]
    :user           {:id       "0x"
                     :name     "Geroge"
@@ -113,4 +113,6 @@
    :login          {:email    ""
                     :password ""}
    :keystore       deserialized-ks
+   :type           "customer"
+   :payed          false
    })

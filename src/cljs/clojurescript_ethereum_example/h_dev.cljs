@@ -62,15 +62,21 @@
 (reg-event-db
  :ui/login
  interceptors
- (fn [db]
-   (assoc db :page 0)))
+ (fn [db [type]]
+   (console :log "type:" type)
+   (-> db
+       (assoc :type type)
+       (assoc :page 0))))
 
 (reg-event-db
  :ui/logout
  interceptors
  (fn [db]
    (remove-item session-storage "keystore")
-   (assoc db :page 3)))
+   (-> db
+       (assoc :type "customer")
+       (dissoc :keystore)
+       (assoc :page 3))))
 
 
 (reg-event-db

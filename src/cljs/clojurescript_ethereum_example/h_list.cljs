@@ -49,26 +49,27 @@
    (console :log "handler:enquiry/send"
             (get-in db [:enquiry :id]))
    (console :log "send db: " db)
-   (let [address (get-in db [:new-tweet :address])
-         strClj  (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
-         strEnc  (u/getEncrypted (get-in db [:enquiry :key]) strClj)]
+   (let [from   (get-in db [:new-tweet :address])
+         to     (:dealer (:enquiry db))
+         strClj (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
+         ;; strEnc (u/getEncrypted (get-in db [:enquiry :key]) strClj)
+         ]
      ;; a json with id.. would be a encrypted sencente. 
-     (console :log "sending data:" strClj "->"  strEnc)
+     ;; (console :log "sending data:" strClj "->"  strEnc)
      ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
      {:db (assoc-in db [:enquiry :open] false)
       :web3-fx.contract/state-fn
       {:instance (:instance (:contract db))
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
-       :fn       [:add-tweet (str/lower-case (get-in db [:enquiry :dealer])) strEnc
-                  {:from address
-                   :gas  tweet-gas-limit
+       :fn       [:add-enquiries from to strClj (.getTime (js/Date.))
+                  ;; :add-enquiries from to (str/lower-case (get-in db [:enquiry :dealer])) strClj
+                  {:from     from
+                   :gas      tweet-gas-limit
                    :gasPrice 20000000000}
                   :enquiry/received
                   :log-error
-                  :enquiry/transaction-receipt-loaded]}
-      }
-     )))
+                  :enquiry/transaction-receipt-loaded]}})))
 
 (reg-event-db
  :enquiry/received

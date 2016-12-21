@@ -14,15 +14,17 @@
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
 
 (defn- drawer-component []
-  (let [drawer (subscribe [:db/drawer])]
+  (let [drawer (subscribe [:db/drawer])
+        type   (subscribe [:db/type])]
     (fn []
       [ui/drawer {:docked false
                   :open   (:open @drawer)
                   }
        [ui/menu-item {:onTouchTap #(dispatch [:ui/drawer])} "-CLOSE-"]
-       [ui/menu-item {:onTouchTap #(do
-                                     (dispatch [:ui/page 0])
-                                     (dispatch [:ui/drawer]))} "messages"]
+       (when-not (= @type "customer")
+         [ui/menu-item {:onTouchTap #(do
+                                       (dispatch [:ui/page 0])
+                                       (dispatch [:ui/drawer]))} "messages"])
        [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 2])
                                      (dispatch [:ui/drawer]))} "list"]
@@ -71,9 +73,8 @@
         ;; list
         [:div (display @page 2)
          [v_list/enquiry-component]
-         [v_list/list-component] 
+         [v_list/list-component]
          ]
         [:div (display @page 3)
          [v_login/login-component]]
         ]])))
-
