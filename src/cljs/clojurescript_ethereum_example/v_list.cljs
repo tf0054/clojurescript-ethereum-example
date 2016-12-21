@@ -43,7 +43,8 @@
          [:h1 "Cars"]
          (for [{:keys [id name price image dealer]} @cars]
            [:div {:style {:margin-top 20
-                          :height     120}
+                          :height     120
+                          :font-size  "0.8em"}
                   :key   id}
             [:img {:src    image
                    :height 110}]

@@ -17,31 +17,36 @@
   (let [pw (js/prompt "Please Enter Password" "password")]
     (callback nil pw)))
 
-(defn create-vault-callback
-  [err ks]
-  (if-not (nil? err) (throw err))
-  (let [login (subscribe [:db/login])]
-    (.keyFromPassword ks (:password @login)
-                      (fn [err pw-derived-key]
-                        (if-not (nil? err)
-                          (throw err))
-                        (.generateNewAddress ks pw-derived-key 3)
-                        (.log js/console (.getAddresses ks))
-                        (.log js/console (.serialize ks))
-                        (set! (.-passwordProvider ks) enter-password)
-                        (POST "/register"
-                              {:params          {:email    (:email @login)
-                                                 :password (:password @login)
-                                                 :keystore (.serialize ks)}
-                               :handler         (fn [res] (.log js/console res))
-                               :response-format :json
-                               :keywords?       true})))))
+
 (defn register-handler
-  []
+  [type]
   (let [login    (subscribe [:db/login])
         keystore (.-keystore js/lightwallet)]
+    (dispatch [:ui/register-type type])
     (.createVault keystore (clj->js {:password (:password @login)})
-                  create-vault-callback)))
+                  (fn [err ks]
+                    (if-not (nil? err) (throw err))
+                    (let [login         (subscribe [:db/login])]
+                      (.keyFromPassword ks (:password @login)
+                                        (fn [err pw-derived-key]
+                                          (if-not (nil? err)
+                                            (throw err))
+                                          (.generateNewAddress ks pw-derived-key 3)
+                                          (.addHdDerivationPath ks "m/0'/0'/1'" pw-derived-key (clj->js {:curve "curve25519", :purpose "asymEncrypt"}))
+                                          (.generateNewEncryptionKeys ks pw-derived-key 1 "m/0'/0'/1'")
+                                          (.log js/console (.getAddresses ks))
+                                          (.log js/console (.serialize ks))
+                                          (.log js/console (first (.getPubKeys ks "m/0'/0'/1'")))
+                                          (set! (.-passwordProvider ks) enter-password)
+                                          (POST "/register"
+                                                {:params          {:email    (:email @login)
+                                                                   :password (:password @login)
+                                                                   :keystore (.serialize ks)
+                                                                   :pubkey   (first (.getPubKeys ks "m/0'/0'/1'"))
+                                                                   :type     type} 
+                                                 :handler         (fn [res] (.log js/console res))
+                                                 :response-format :json
+                                                 :keywords?       true}))))))))
 
 
 (defn login-success-handler [res]
@@ -89,7 +94,6 @@
       {:secondary    true
        :label        "Login"
        :style        {:margin-top 15}
-       ;;:on-touch-tap #(dispatch [:ui/login])
        :on-touch-tap (fn []
                        (let [page     (subscribe [:db/page])
                              login    (subscribe [:db/login])]
@@ -104,13 +108,13 @@
        }]
      [ui/raised-button
       {:secondary    true
-       :label        "Register"
+       :label        "Register as a customer"
        :style        {:margin-top 15 :margin-left 15}
-       ;;:on-touch-tap #(dispatch [:ui/login])
-       :on-touch-tap (fn []
-                       (let [page     (subscribe [:db/page])
-                             login    (subscribe [:db/login])]
-                         (.log js/console (:email @login))
-                         (.log js/console (:password @login))
-                         (register-handler)))
+       :on-touch-tap #(register-handler "customer")
+       }]
+     [ui/raised-button
+      {:secondary    true
+       :label        "Register as a dealer"
+       :style        {:margin-top 15 :margin-left 15}
+       :on-touch-tap #(register-handler "dealer")
        }]]]])

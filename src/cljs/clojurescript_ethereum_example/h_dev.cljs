@@ -78,6 +78,12 @@
        (dissoc :keystore)
        (assoc :page 3))))
 
+(reg-event-db
+ :ui/register-type
+ interceptors
+ (fn [db [type]]
+   (assoc db :register-type type)))
+
 
 (reg-event-db
  :ui/web3
