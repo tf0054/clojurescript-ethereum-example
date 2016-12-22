@@ -29,19 +29,22 @@
  :initialize
  (fn [_ _]
    (console :log "initialize")
-   (merge
-    {:db         db/default-db
-     :http-xhrio {:method          :get
-                  :uri             (gstring/format "./contracts/build/%s.abi"
-                                                   (get-in db/default-db [:contract :name]))
-                  :timeout         6000
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:contract/abi-loaded]
-                  :on-failure      [:log-error]}}
-    (when (:provides-web3? db/default-db)
-      {:web3-fx.blockchain/fns
-       {:web3 (:web3 db/default-db)
-        :fns  [[web3-eth/accounts :blockchain/my-addresses-loaded :log-error]]}}))))
+   (console :log "db/default-db" (clj->js db/default-db))
+   (let [result     {:db         db/default-db
+                     :http-xhrio {:method          :get
+                                  :uri             (gstring/format "./contracts/build/%s.abi"
+                                                                   (get-in db/default-db [:contract :name]))
+                                  :timeout         6000
+                                  :response-format (ajax/json-response-format {:keywords? true})
+                                  :on-success      [:contract/abi-loaded]
+                                  :on-failure      [:log-error]}
+                     :dispatch   [:blockchain/my-addresses-loaded]}
+         #_ {:web3-fx.blockchain/fns {:web3 (:web3 db/default-db)
+                                      :fns  [[#(:my-addresses db/default-db)
+                                              :blockchain/my-addresses-loaded
+                                              :log-error]]}
+             }]
+     result)))
 
 (reg-event-fx
  :reload
@@ -99,7 +102,7 @@
                        :value value
                        :gasPrice (web3-eth/gas-price web3)}
          gas          (web3-eth/estimate-gas web3 tx)]
-     ;; a json with id.. would be a encrypted sencente. 
+     ;; a json with id.. would be a encrypted sencente.
      (console :log "send transaction:" (clj->js (assoc tx :gas gas)))
      (web3-eth/send-transaction! web3 (assoc tx :gas gas) (fn [err tx]
                                                             (console :log "err:" err)

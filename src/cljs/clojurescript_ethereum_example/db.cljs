@@ -2,7 +2,7 @@
   (:require
    [clojure.string :as str]
    [hodgepodge.core :refer [session-storage get-item set-item]]
-   [cljs-web3.core :as web3]))
+   [cljs-web3.core :as web3-core]))
 
 (def serialized-ks (get-item session-storage "keystore"))
 
@@ -26,7 +26,7 @@
   [ks]
   (let [provider  (js/HookedWeb3Provider. (clj->js {:host rpc-url :transaction_signer ks}))
         web3      (js/Web3.)]
-    (web3/set-provider web3 provider)
+    (web3-core/set-provider web3 provider)
     (set! (.-accounts (.-eth web3)) (.getAddresses ks))
     (set! (.-getAccounts (.-eth web3)) #(.getAddresses ks))
     web3))
