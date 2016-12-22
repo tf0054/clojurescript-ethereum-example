@@ -255,7 +255,7 @@
        :fns  [[web3-eth/contract-new
                (js/JSON.parse abi)
                {:gas  4500000
-                :gasPrice 20000000000
+                :gasPrice (web3-eth/gas-price (:web3 db))
                 :data bin
                 :from (first (:my-addresses db))}
                :contract/deployed

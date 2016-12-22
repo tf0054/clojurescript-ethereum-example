@@ -14,9 +14,7 @@
    [goog.string.format]
    [madvas.re-frame.web3-fx]
    [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
-   [clojurescript-ethereum-example.utils :as u]
-   )
-  )
+   [clojurescript-ethereum-example.utils :as u]))
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])
@@ -66,7 +64,7 @@
                   ;; :add-enquiries from to (str/lower-case (get-in db [:enquiry :dealer])) strClj
                   {:from     from
                    :gas      tweet-gas-limit
-                   :gasPrice 20000000000}
+                   :gasPrice (web3-eth/gas-price (:web3 db))}
                   :enquiry/received
                   :log-error
                   :enquiry/transaction-receipt-loaded]}})))
@@ -76,8 +74,7 @@
  interceptors
  (fn [db [transaction-hash]]
    (console :log "Enquiry was confirmed! on" transaction-hash)
-   (assoc-in db [:enquiry :text] "")
-   ))
+   (assoc-in db [:enquiry :text] "")))
 
 (reg-event-db
  :enquiry/transaction-receipt-loaded
@@ -86,5 +83,4 @@
    (console :log "Enquiry was mined! like" transaction-receipt)
    (when (= gas-used tweet-gas-limit)
      (console :error "All gas used"))
-   db
-   ))
+   db))
