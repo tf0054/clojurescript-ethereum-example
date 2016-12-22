@@ -30,21 +30,15 @@
  (fn [_ _]
    (console :log "initialize")
    (console :log "db/default-db" (clj->js db/default-db))
-   (let [result     {:db         db/default-db
-                     :http-xhrio {:method          :get
-                                  :uri             (gstring/format "./contracts/build/%s.abi"
-                                                                   (get-in db/default-db [:contract :name]))
-                                  :timeout         6000
-                                  :response-format (ajax/json-response-format {:keywords? true})
-                                  :on-success      [:contract/abi-loaded]
-                                  :on-failure      [:log-error]}
-                     :dispatch   [:blockchain/my-addresses-loaded]}
-         #_ {:web3-fx.blockchain/fns {:web3 (:web3 db/default-db)
-                                      :fns  [[#(:my-addresses db/default-db)
-                                              :blockchain/my-addresses-loaded
-                                              :log-error]]}
-             }]
-     result)))
+   {:db                          db/default-db
+    :http-xhrio {:method          :get
+                 :uri             (gstring/format "./contracts/build/%s.abi"
+                                                  (get-in db/default-db [:contract :name]))
+                 :timeout         6000
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success      [:contract/abi-loaded]
+                 :on-failure      [:log-error]}
+    :dispatch   [:blockchain/my-addresses-loaded]}))
 
 (reg-event-fx
  :reload
@@ -78,9 +72,6 @@
    (console :log "address:" address)
    (console :log "is-payed:" is-payed)
    (let [contract (get-in db [:contract :instance])]
-     #_(doseq [x (range 0 enquiry-count)]
-         (.getDealerEnquiry contract address x (fn [err [from to message date]]
-                                                 (console :log "enquiry" (clj->js {:from from :to to :message message :date (js/Date. (* (.toNumber date) 1000))})))))
      {:db       (-> db
                     (assoc :payed  is-payed)
                     (assoc :tweets (into [] (for [x (range 0 (.toNumber enquiry-count))] nil)))
@@ -315,5 +306,4 @@
      (do
        (dispatch [:reload])
        (assoc-in db [:page] x))
-     (assoc-in db [:page] 3) ;; jump to login
-     )))
+     (assoc-in db [:page] 3))))
