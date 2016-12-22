@@ -90,7 +90,7 @@
  interceptors
  (fn [db [ks]]
    (let [ks        ks
-         provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl "http://localhost:8545" :transaction_signer ks}))
+         provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl db/rpc-url :transaction_signer ks}))
          web3      (js/Web3.)
          addresses (map #(str "0x" %) (js->clj (.getAddresses ks)))]
      (web3/set-provider web3 provider)
