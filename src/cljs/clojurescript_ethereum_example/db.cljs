@@ -24,9 +24,11 @@
 
 (defn generate-web3
   [ks]
-  (let [provider  (js/HookedWeb3Provider. (clj->js {:rpcUrl rpc-url :transaction_signer ks}))
+  (let [provider  (js/HookedWeb3Provider. (clj->js {:host rpc-url :transaction_signer ks}))
         web3      (js/Web3.)]
     (web3/set-provider web3 provider)
+    (set! (.-accounts (.-eth web3)) (.getAddresses ks))
+    (set! (.-getAccounts (.-eth web3)) #(.getAddresses ks))
     web3))
 
 
