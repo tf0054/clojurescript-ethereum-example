@@ -7,6 +7,9 @@
                  [cljsjs/bignumber "2.1.4-1"]
                  [cljsjs/react-flexbox-grid "0.10.2-1"
                   :exclusions [cljsjs/react]]
+                 [io.github.theasp/simple-encryption "0.1.0"
+                  :exclusions [cljsjs/forge com.taoensso/timbre]]
+                 [cljsjs/forge "0.6.38-1"] ;; bc 0.6.38-0 is broken
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [compojure "1.6.0-beta2"
                   :exclusions [commons-codec]]
@@ -26,8 +29,6 @@
                  [ring/ring-core "1.6.0-beta5"]
                  [ring/ring-defaults "0.3.0-beta1"]
                  [ring/ring-devel "1.6.0-beta5"]
-                 [io.github.theasp/simple-encryption "0.1.0"
-                  :exclusions [com.taoensso/timbre]]
                  [com.taoensso/timbre "4.7.4"]
                  [jarohen/chord "0.7.0"
                   :exclusions [commons-codec org.clojure/core.async]]
@@ -39,7 +40,11 @@
             [lein-cljsbuild "1.1.5"
              :exclusions [org.clojure/clojure]]
             [lein-shell "0.5.0"]
-            [deraen/lein-less4j "0.6.0"]]
+            [lein-pprint "1.1.2"]
+            [deraen/lein-less4j "0.6.0"]
+            [cider/cider-nrepl "0.14.0"]
+            [refactor-nrepl "2.2.0"]
+            ]
 
   :min-lein-version "2.5.3"
   :main clojurescript-ethereum-example.core
@@ -96,17 +101,29 @@
                                             :source-map-timestamp true
                                             :optimizations        :none
                                             :closure-defines      {goog.DEBUG true}
-                                            :preloads             [print.foo.preloads.devtools]}}]}}
+                                            :preloads             [print.foo.preloads.devtools]}}
+                            {:id           "min"
+                             :source-paths ["src/cljs"]
+                             :compiler     {:main            clojurescript-ethereum-example.core
+                                            :output-to       "resources/public/js/compiled/app.js"
+                                            :optimizations   :advanced
+                                            :closure-defines {goog.DEBUG false}
+                                            :pretty-print    false}}
+                            ]}
 
-   :uberjar {:hooks       [leiningen.cljsbuild]
-             :omit-source true
-             :aot         :all
-             :main        clojurescript-ethereum-example.core
-             :cljsbuild   {:builds {:app {:id           "uberjar"
-                                          :source-paths ["src/cljs"]
-                                          :compiler     {:main            clojurescript-ethereum-example.core
-                                                         :output-to       "resources/public/js/compiled/app.js"
-                                                         :optimizations   :advanced
-                                                         :closure-defines {goog.DEBUG false}
-                                                         :pretty-print    true
-                                                         :pseudo-names    true}}}}}})
+    }}
+
+  :uberjar {:hooks       [leiningen.cljsbuild]
+            :omit-source true
+            :aot         :all
+            :main        clojurescript-ethereum-example.core
+            :cljsbuild   {:builds {:app {:id           "uberjar"
+                                         :source-paths ["src/cljs"]
+                                         :compiler     {:main            clojurescript-ethereum-example.core
+                                                        :output-to       "resources/public/js/compiled/app.js"
+                                                        :optimizations   :advanced
+                                                        :closure-defines {goog.DEBUG false}
+                                                        :pretty-print    true
+                                                        :pseudo-names    true}}}}
+  })
+

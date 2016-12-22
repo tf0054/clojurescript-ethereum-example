@@ -16,8 +16,10 @@
     (fn []
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
-        [ui/paper {:style {:padding "0 20px 20px"}}
-         [:br]
+        [ui/paper {:style {:padding "0 20px 20px" :margin-top 15 }}
+         [:a {:href "/browser-solidity/index.html"
+              :target "_blank"} "browser-solidity (local)"]
+         [:hr]
          @num
          [:br]
          [ui/raised-button
@@ -26,6 +28,7 @@
            :style        {:margin-top 15}
            :on-touch-tap #(dispatch [:tf0054/getTweetsNum])
            }]
+         [:hr]
          ]]]
       )))
 

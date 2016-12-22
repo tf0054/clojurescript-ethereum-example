@@ -17,20 +17,17 @@
             (clojure.string/lower-case "0x39c4B70174041AB054f7CDb188d270Cc56D90da8")
             {:role "RTC"}
             (clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
-            {:role "DEALER01"}
+            {:role "DEALER"
+             :name "DEALER_NAME_01"
+             :key  "key01dealer"}
             (clojure.string/lower-case "0x78348AA884Cb4b4619514e728631742AE8Dd9927")
-            {:role "DEALER02"}
+            {:role "DEALER"
+             :name "DEALER_NAME_02"
+             :key  "key02dealer"}
             (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
-            {:role "CUSTOMER01"}
+            {:role "CUSTOMER"
+             :name "CUSTOMER_NAME_02"}
             })
-
-;; For providing the key
-(def dealers {(clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
-              {:name "DEALER01"
-               :key  "key01dealer"}
-              (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
-              {:name "DEALER02"
-               :key  "key02dealer"}})
 
 (defroutes routes
 
@@ -39,43 +36,32 @@
   (resources "/images/" {:root "images"})
 
   ;; DEALER KEY
-  (GET "/key/:id/:num" [id num];; "/dealers/" isnt dealt with.
-       {:status  200
-        :headers {"Content-Type" "application/json"}
-        :body    (json/generate-string
-                  (if (nil? (and id (get dealers id)))
-                    {}
-                    (dissoc (get dealers id) :name :address)))
-        })
-  
-  ;; DEALER INFO
-  (GET "/dealers/:raw_id" [raw_id];; "/dealers/" isnt dealt with.
+  (GET "/key/:id/:num" [raw_id num];; "/dealers/" isnt dealt with.
        (let [id (clojure.string/lower-case raw_id)]
-         (println "dealers: " id)
-         {:status  200
-          :headers {"Content-Type" "application/json"}
-          :body    (json/generate-string
-                    (if (nil? (and id (get dealers id)))
-                      {}
-                      (get dealers id)))
-          }))
-
-  ;; USER INFO
-  (GET "/users/:raw_id" [raw_id];; "/users/" isnt dealt with.
-       (let [id (clojure.string/lower-case raw_id)]
-         (println "users: " id)
          {:status  200
           :headers {"Content-Type" "application/json"}
           :body    (json/generate-string
                     (if (nil? (and id (get users id)))
                       {}
-                      (get users id)))
+                      (dissoc (get users id) :role :name)))
+          }))
+  
+  ;; DEALER/CUSTOMER INFO
+  (GET "/users/:raw_id" [raw_id];; "/dealers/" isnt dealt with.
+       (let [id (clojure.string/lower-case raw_id)]
+         (println "dealers: " id)
+         {:status  200
+          :headers {"Content-Type" "application/json"}
+          :body    (json/generate-string
+                    (if (nil? (and id (get users id)))
+                      {}
+                      (dissoc (get users id) :key)))
           }))
 
   (GET "/js/*" _
        {:status 404})
 
-  ;; ENV
+  ;; FOR GETTING ENV MAINLY FOR CLJS
   (GET "/env/" _
        (if-let [key (env :recruit)]
          {:status  200
@@ -85,6 +71,7 @@
                                           })}
          {:status 404})) ;; DEBUG
 
+  ;; FOR DEV
   (GET "/cors" _
        {:status  200
         :headers {"Content-Type" "text/html; charset=utf-9"
