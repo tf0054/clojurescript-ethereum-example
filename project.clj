@@ -100,6 +100,7 @@
                                             :asset-path           "./js/compiled/out"
                                             :source-map-timestamp true
                                             :optimizations        :none
+                                            :externs ["resources/public/js/stomp/externs.js"]
                                             :closure-defines      {goog.DEBUG true}
                                             :preloads             [print.foo.preloads.devtools]}}
                             {:id           "min"
@@ -107,8 +108,10 @@
                              :compiler     {:main            clojurescript-ethereum-example.core
                                             :output-to       "resources/public/js/compiled/app.js"
                                             :optimizations   :advanced
+                                            :externs ["resources/public/js/stomp/externs.js"]
                                             :closure-defines {goog.DEBUG false}
-                                            :pretty-print    false}}
+                                            :pretty-print    false
+}}
                             ]}
 
     }}
@@ -122,6 +125,7 @@
                                          :compiler     {:main            clojurescript-ethereum-example.core
                                                         :output-to       "resources/public/js/compiled/app.js"
                                                         :optimizations   :advanced
+                                                        :externs ["resources/public/js/stomp/externs.js"]
                                                         :closure-defines {goog.DEBUG false}
                                                         :pretty-print    true
                                                         :pseudo-names    true}}}}
