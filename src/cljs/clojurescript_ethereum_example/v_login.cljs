@@ -57,7 +57,7 @@
   (let [login (subscribe [:db/login])]
     (if (true? (:success res))
       (do
-        (dispatch [:ui/login (:type (:user res))])
+        (dispatch [:ui/login (:user res)])
         (let [keystore (.-keystore js/lightwallet)
               ks       (.deserialize keystore (:keystore (:user res)))
               login    (subscribe [:db/login])]

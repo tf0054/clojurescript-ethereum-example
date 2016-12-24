@@ -62,10 +62,11 @@
 (reg-event-db
  :ui/login
  interceptors
- (fn [db [type]]
-   (console :log "type:" type)
+ (fn [db [user]]
+   (console :log "type:" (:type user))
    (-> db
-       (assoc :type type)
+       (assoc-in [:login :name] (:name user))
+       (assoc :type (:type user))
        (assoc :page 0))))
 
 (reg-event-db

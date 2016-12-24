@@ -27,6 +27,7 @@
   (let [provider  (js/HookedWeb3Provider. (clj->js {:host rpc-url :transaction_signer ks}))
         web3      (js/Web3.)]
     (web3-core/set-provider web3 provider)
+    ;; for ropsten.infura.io
     (set! (.-accounts (.-eth web3)) (.getAddresses ks))
     (set! (.-getAccounts (.-eth web3)) #(.getAddresses ks))
     web3))
@@ -55,10 +56,6 @@
                     :address  new-tweet-address
                     :sending? false}
    :web3           web3
-   ;; :web3           (or (aget js/window "web3")
-   ;;                     (if goog.DEBUG
-   ;;                       (web3/create-web3 "http://localhost:8545/")
-   ;;                      (web3/create-web3 "https://morden.infura.io/metamask")))
    :provides-web3? (not (nil? web3))
    :contract       {:name     "carsensor"
                     :abi      nil
@@ -113,10 +110,11 @@
                     :name      nil
                     :price     nil
                     :dealer    nil
-                    :text      nil
+                    :text      "test"
                     :key       nil}
    :login          {:email    ""
-                    :password ""}
+                    :password ""
+                    :name     ""}
    :keystore       deserialized-ks
    :type           "customer"
    :payed          false

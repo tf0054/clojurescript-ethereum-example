@@ -103,33 +103,3 @@
        (console :log (str "tweets[" i "]")  (clj->js (nth @tweets i)))
        (dispatch [:server/fetch-key (:from (nth @tweets i)) nil false i]))
      db)))
-
-(reg-event-db
- :customer-key-result
- (fn [db [_ x result]]
-   (console :log "http-c-result(KEY):" (if-let [y (:key result)]
-                                         y
-                                         "cannot find!"))
-   (assoc-in db x (:key result))))
-
-(reg-event-db
- :dealer-key-result
- (fn [db [_ result]]
-   (console :log "result:" (clj->js result))
-   (console :log "http-d-result(KEY):" (if-let [x (:pubkey result)]
-                                         x
-                                         "cannot find!"))
-   (assoc-in db [:tweets] (into [] (map (fn [x]
-                                          (console :log "mapped:" (clj->js x))
-                                          (merge (dissoc x :text)
-                                                 (if (> (.-length (:text x)) 40) ;; NOT GOOD
-                                                   (let [rawHash
-                                                         (reader/read-string
-                                                          (u/getDecrypted (:key result) (:text x)))]
-                                                     (console :log "DECODED:" rawHash)
-                                                     {:text [ui/paper {:style {:padding "5px 10px 10px"}}
-                                                             [:div "CAR_NAME: " (:name rawHash)]
-                                                             [:div "PRICE: " (:price rawHash)]
-                                                             [:div "MESSAGE: "  (:text rawHash)]]})
-                                                   {:text (:text x)})))
-                                        (:tweets db))))))

@@ -21,31 +21,24 @@
                   :open   (:open @drawer)
                   }
        [ui/menu-item {:onTouchTap #(dispatch [:ui/drawer])} "-CLOSE-"]
-       (when-not (= @type "customer")
-         [ui/menu-item {:onTouchTap #(do
-                                       (dispatch [:ui/page 0])
-                                       (dispatch [:ui/drawer]))} "messages"])
+       [ui/menu-item {:onTouchTap #(do
+                                     (dispatch [:ui/page 0])
+                                     (dispatch [:ui/drawer]))} (if (= @type "customer") "account info" "messages")]
        [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 2])
                                      (dispatch [:ui/drawer]))} "list"]
-       [ui/menu-item {:onTouchTap #(do
+       #_[ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 1])
                                      (dispatch [:ui/drawer]))} "development"]
        [ui/menu-item {:onTouchTap #(do
                                      (dispatch [:ui/page 3])
                                      (dispatch [:ui/logout])
-                                     (dispatch [:ui/drawer]))} "logout"]
-       ]
-      )
-    )
-  )
+                                     (dispatch [:ui/drawer]))} "logout"]])))
 
 (defn- display [x y]
   (if (== x y)
     {:style {:display "block"}}
-    {:style {:display "none"}}
-    )
-  )
+    {:style {:display "none"}}))
 
 (defn main-panel []
   (let [page (subscribe [:db/page])]
@@ -55,26 +48,19 @@
                                              :accent1-color  (color :amber700)}})}
        [:div
         [ui/app-bar {:title                    "Blockchain DEMO: \"carsensor.net\""
-                     :onLeftIconButtonTouchTap #(do (dispatch [:ui/drawer])
-                                                    ;; (println "LeftNav")
-                                                    )
-                     }]
+                     :onLeftIconButtonTouchTap #(do (dispatch [:ui/drawer]))}]
         [drawer-component]
         ;; default
         [:div (display @page 0)
          [v_twitter/new-tweet-component]
-         [v_twitter/tweets-component]
-         ]
+         [v_twitter/tweets-component]]
         ;; development
         [:div (display @page 1)
          [v_dev/dev-component0]
-         [v_dev/dev-component1]
-         ]
+         [v_dev/dev-component1]]
         ;; list
         [:div (display @page 2)
          [v_list/enquiry-component]
-         [v_list/list-component]
-         ]
+         [v_list/list-component]]
         [:div (display @page 3)
-         [v_login/login-component]]
-        ]])))
+         [v_login/login-component]]]])))

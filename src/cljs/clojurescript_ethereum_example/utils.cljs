@@ -8,49 +8,11 @@
             [cljs.reader :as reader]
             ))
 
-(defn truncate
-  "Truncate a string with suffix (ellipsis by default) if it is
-   longer than specified length."
-  ([string length]
-   (truncate string length "..."))
-  ([string length suffix]
-   (let [string-len (count string)
-         suffix-len (count suffix)]
-     (if (<= string-len length)
-       string
-       (str (subs string 0 (- length suffix-len)) suffix)))))
-
 (defn evt-val [e]
   (aget e "target" "value"))
-
-(defn big-number->date-time [big-num]
-  (to-date-time (* (.toNumber big-num) 1000)))
 
 (defn eth [big-num]
   (str (web3/from-wei big-num :ether) " ETH"))
 
 (defn format-date [date]
   (time-format/unparse-local (time-format/formatters :rfc822) (to-default-time-zone (to-date-time date))))
-
-(defn- getFakeEnc [enc]
-  (b64/encodeString (pr-str enc))
-  )
-
-(defn- getFakeDec [dec]
-  (reader/read-string (b64/decodeString dec))  
-  )
-
-(defn getEncrypted [key value]
-  (.log js/console "getEncrypted")
-  (.log js/console "key:" key)
-  (.log js/console "key:" key)
-  (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
-    (getFakeEnc (se/encrypt-with kdf value
-                                 {:kdf-iterations 9000}))))
-
-(defn getDecrypted [key evalue] 
-  (.log js/console "getDecrypted")
-  (.log js/console "key:" key)
-  (.log js/console "key:" key)
-  (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
-    (se/decrypt-with kdf (getFakeDec evalue))))
