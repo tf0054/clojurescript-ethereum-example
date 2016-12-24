@@ -74,4 +74,4 @@
           {:secondary    true
            :label        "decode msg"
            :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:server/fetch-key (first @myaddrs) false])}]]]])))
+           :on-touch-tap #(dispatch [:decrypt/messages])}]]]])))

@@ -13,7 +13,8 @@
    [goog.string :as gstring]
    [goog.string.format]
    [madvas.re-frame.web3-fx]
-   [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
+   [hodgepodge.core :refer [session-storage get-item set-item]]
+   [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch subscribe]]
    [clojurescript-ethereum-example.utils :as u]))
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
@@ -41,33 +42,57 @@
    (assoc-in db [:enquiry :text] value)))
 
 (reg-event-fx
- :enquiry/send
+ :enquiry/send-encrypt-message
  interceptors
- (fn [{:keys [db]} []]
-   (console :log "handler:enquiry/send"
-            (get-in db [:enquiry :id]))
-   (console :log "send db: " db)
-   (let [from   (get-in db [:new-tweet :address])
-         to     (:dealer (:enquiry db))
-         strClj (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
-         ;; strEnc (u/getEncrypted (get-in db [:enquiry :key]) strClj)
-         ]
-     ;; a json with id.. would be a encrypted sencente. 
-     ;; (console :log "sending data:" strClj "->"  strEnc)
-     ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
-     {:db (assoc-in db [:enquiry :open] false)
-      :web3-fx.contract/state-fn
+ (fn [{:keys [db]} [from to encrypted-message]]
+   (console :log ":enquiry/send-encrypted-message db:" (clj->js db))
+   (console :log "from:" from)
+   (console :log "to:" to)
+   (console :log "encrypted-message:" (js/btoa (.stringify js/JSON encrypted-message)))
+   {:db db
+    :web3-fx.contract/state-fn
       {:instance (:instance (:contract db))
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
-       :fn       [:add-enquiries from to strClj (.getTime (js/Date.))
+       :fn       [:add-enquiries from to (js/btoa (.stringify js/JSON encrypted-message)) (.getTime (js/Date.))
                   ;; :add-enquiries from to (str/lower-case (get-in db [:enquiry :dealer])) strClj
                   {:from     from
                    :gas      tweet-gas-limit
                    :gasPrice (web3-eth/gas-price (:web3 db))}
                   :enquiry/received
                   :log-error
-                  :enquiry/transaction-receipt-loaded]}})))
+                  :enquiry/transaction-receipt-loaded]}}))
+
+(reg-event-fx
+ :enquiry/send
+ interceptors
+ (fn [{:keys [db]} []]
+   (console :log "handler:enquiry/send"
+            (get-in db [:enquiry :id]))
+   (console :log "send db: " db)
+   (let [from            (get-in db [:new-tweet :address])
+         to              (:dealer (:enquiry db))
+         message         (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
+         ;; strEnc (u/getEncrypted (get-in db [:enquiry :key]) strClj)
+         ks              (:keystore db)
+         dealer-pubkey   (get-in db [:enquiry :key])
+         encrypt-hd-path "m/0'/0'/1'"
+         my-pubkey       (first (.getPubKeys ks encrypt-hd-path))
+         password        (get-item session-storage "password")]
+     (.keyFromPassword ks password
+                       (fn [err pw-derived-key]
+                         (console :log "err:" err)
+                         (console :log "pw-derived-key-1:" pw-derived-key)
+                         (console :log "dealer-pubkey:" dealer-pubkey)
+                         (console :log "my-pubkey:" my-pubkey)
+                         (let [encryption        (.-encryption js/lightwallet)
+                               encrypted-message (.multiEncryptString encryption ks pw-derived-key message my-pubkey (clj->js [dealer-pubkey]) encrypt-hd-path)]
+                           (console :log "encrypted-message:" encrypted-message)
+                           (dispatch [:enquiry/send-encrypt-message from to encrypted-message]))))
+     ;; a json with id.. would be a encrypted sencente. 
+     ;; (console :log "sending data:" strClj "->"  strEnc)
+     ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
+     {:db (assoc-in db [:enquiry :open] false)})))
 
 (reg-event-db
  :enquiry/received

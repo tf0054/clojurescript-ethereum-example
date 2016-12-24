@@ -87,12 +87,12 @@
                      :name   "Fiat punto"
                      :price  1000000
                      :image  "/images/car001.jpg"
-                     :dealer (str/lower-case "0x1c90b30e6fa89fe54801989b17dc8d985f2a2e81")}
+                     :dealer (str/lower-case "0xfff3f282061c2add91d8850e4eb824a02f063f16")}
                     {:id     "car002"
                      :name   "Fiat punto"
                      :price  2000000
                      :image  "/images/car002.jpg"
-                     :dealer (str/lower-case "0x1c90b30e6fa89fe54801989b17dc8d985f2a2e81")}
+                     :dealer (str/lower-case "0xfff3f282061c2add91d8850e4eb824a02f063f16")}
                     {:id     "car003"
                      :name   "Fiat punto"
                      :price  3000000

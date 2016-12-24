@@ -43,7 +43,7 @@
                                                                    :password (:password @login)
                                                                    :keystore (.serialize ks)
                                                                    :pubkey   (first (.getPubKeys ks "m/0'/0'/1'"))
-                                                                   :type     type} 
+                                                                   :type     type}
                                                  :handler         (fn [res] (.log js/console res))
                                                  :response-format :json
                                                  :keywords?       true}))))))))
@@ -54,20 +54,23 @@
   (.log js/console (true? (:success res)))
   (.log js/console (:keystore (:user res)))
   (.log js/console (.parse js/JSON (:keystore (:user res))))
-  (if (true? (:success res))
-    (do
-      (dispatch [:ui/login (:type (:user res))])
-      (let [keystore (.-keystore js/lightwallet)
-            ks       (.deserialize keystore (:keystore (:user res)))
-            login    (subscribe [:db/login])]
-        (set! (.-passwordProvider ks) enter-password)
-        (set-item session-storage "keystore" (:keystore (:user res)))
-        (dispatch [:ui/web3 ks])
-        (dispatch [:blockchain/my-addresses-loaded])
-        (dispatch [:reload])
-        (.log js/console res))
-      )
-    (js/alert "login failed. please check email or password.")))
+  (let [login (subscribe [:db/login])]
+    (if (true? (:success res))
+      (do
+        (dispatch [:ui/login (:type (:user res))])
+        (let [keystore (.-keystore js/lightwallet)
+              ks       (.deserialize keystore (:keystore (:user res)))
+              login    (subscribe [:db/login])]
+          (set! (.-passwordProvider ks) enter-password)
+          (set-item session-storage "keystore" (:keystore (:user res)))
+          (.log js/console "password:" (:password @login))
+          (set-item session-storage "password" (:password @login))
+          (dispatch [:ui/web3 ks])
+          (dispatch [:blockchain/my-addresses-loaded])
+          (dispatch [:reload])
+          (.log js/console res))
+        )
+      (js/alert "login failed. please check email or password."))))
 
 (defn login-component []
   [row
