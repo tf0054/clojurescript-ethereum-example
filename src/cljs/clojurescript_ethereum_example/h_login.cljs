@@ -1,4 +1,4 @@
-(ns clojurescript-ethereum-example.h-dev
+(ns clojurescript-ethereum-example.h-login
   (:require
    [clojure.string :as str]
    [cljs.reader :as reader]
@@ -23,43 +23,25 @@
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])
 
-(reg-event-fx
- :tf0054/getTweetsNum
- interceptors
- (fn [{:keys [db]} []]
-   (let []
-     (console :log "hendler:ui/getTweetsNum")
-     {:web3-fx.contract/constant-fns
-      {:instance (:instance (:contract db))
-       :fns      [[:get-tweets-num ;; have to call with kebab-case (-> GetTweetsNum)
-                   :ui/tweetsNum :log-error]]}})))
-
-(reg-event-db
- :ui/tweetsNum
- interceptors
- (fn [db [x]]
-   (console :log "hendler:ui/tweetsNum" x)
-   (assoc db :tweetsNum (.toNumber x))))
-
 (reg-event-db
  :ui/cAddrUpdate
  interceptors
  (fn [db [x]]
    (assoc-in db [:contract :address] x)))
 
-#_(reg-event-db
+(reg-event-db
  :ui/loginEmailUpdate
  interceptors
  (fn [db [x]]
    (assoc-in db [:login :email] x)))
 
-#_(reg-event-db
+(reg-event-db
  :ui/loginPasswordUpdate
  interceptors
  (fn [db [x]]
    (assoc-in db [:login :password] x)))
 
-#_(reg-event-db
+(reg-event-db
  :ui/login
  interceptors
  (fn [db [user]]
@@ -69,7 +51,7 @@
        (assoc :type (:type user))
        (assoc :page 0))))
 
-#_(reg-event-db
+(reg-event-db
  :ui/logout
  interceptors
  (fn [db]
@@ -79,14 +61,14 @@
        (dissoc :keystore)
        (assoc :page 3))))
 
-#_(reg-event-db
+(reg-event-db
  :ui/register-type
  interceptors
  (fn [db [type]]
    (assoc db :register-type type)))
 
 
-#_(reg-event-db
+(reg-event-db
  :ui/web3
  interceptors
  (fn [db [ks]]
@@ -102,43 +84,3 @@
          (assoc :my-addresses addresses)
          (assoc :web3 web3)
          (assoc :provides-web3? true)))) )
-
-
-(reg-event-fx
- :ui/cInstUpdate
- interceptors
- (fn [{:keys [db]} []]
-   (console :log "hendler:ui/cInstUpdate" (get-in db [:contract :address]))
-   (let [abi       (get-in db [:contract :abi])
-         web3      (:web3 db)
-         addr      (get-in db [:contract :address])
-         cinstance (web3-eth/contract-at web3 abi addr)]
-     (println cinstance)
-     {:db (assoc-in db [:contract :instance] cinstance)})))
-
-(reg-event-db
- :ui/AAupdate
- interceptors
- (fn [db [value]]
-   (let [val (str/lower-case (str/lower-case value))]
-     (-> db
-         (assoc-in [:dev :address] val)
-         (assoc-in [:dev :enc] val)))))
-
-(reg-event-db
- :ui/amountNum
- interceptors
- (fn [db [x]]
-   (console :log "hendler:ui/amountNum" x)
-   (assoc-in db [:dev :amount] (.toNumber x))))
-
-(reg-event-fx
- :tf0054/getAmount
- interceptors
- (fn [{:keys [db]} [x]]
-   (let []
-     (console :log "hendler:ui/getAmount")
-     {:web3-fx.contract/constant-fns
-      {:instance (:instance (:contract db))
-       :fns      [[:get-Balance x
-                   :ui/amountNum :log-error]]}})))
