@@ -14,9 +14,9 @@
   (let [enquiry (subscribe [:db/enquiry])]
     (fn []
       [ui/dialog {;; :title "test dialog"
-                  :open (if-not (nil? (:open @enquiry))
-                          (:open @enquiry)
-                          false) 
+                  :open  (if-not (nil? (:open @enquiry))
+                           (:open @enquiry)
+                           false)
                   ;; :open false
                   :modal true}
        (:lead-text @enquiry)
@@ -26,13 +26,14 @@
                        ;; :max-length          (:max-name-length @settings)
                        :floating-label-text "Message to dealer"
                        :style               {:width "100%"}}]
-       [:div {:style {:text-align "right"}}
+       [:div {:style {:float "right"}}
         [ui/flat-button {:label        "Submit"
                          :primary      true
-                         :on-touch-tap #(dispatch [:enquiry/send])}] ]
-       ]
-      ))
-  )
+                         :on-touch-tap #(dispatch [:enquiry/send])}]]
+       [:div {:style {:float "right"}}
+        [ui/flat-button {:label        "Close"
+                         :primary      false
+                         :on-touch-tap #(dispatch [:enquiry/close])}]]])))
 
 (defn list-component []
   (let [cars (subscribe [:db/cars])]

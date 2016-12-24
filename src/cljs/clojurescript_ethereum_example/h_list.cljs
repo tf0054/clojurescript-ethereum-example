@@ -55,13 +55,18 @@
        :web3     (:web3 db)
        :db-path  [:contract :send-tweet]
        :fn       [:add-enquiries from to (js/btoa (.stringify js/JSON encrypted-message)) (.getTime (js/Date.))
-                  ;; :add-enquiries from to (str/lower-case (get-in db [:enquiry :dealer])) strClj
                   {:from     from
                    :gas      tweet-gas-limit
                    :gasPrice (web3-eth/gas-price (:web3 db))}
                   :enquiry/received
                   :log-error
                   :enquiry/transaction-receipt-loaded]}}))
+
+(reg-event-fx
+ :enquiry/close
+ interceptors
+ (fn [{:keys [db]}]
+   {:db (assoc-in db [:enquiry :open] false)}))
 
 (reg-event-fx
  :enquiry/send
@@ -73,7 +78,6 @@
    (let [from            (get-in db [:new-tweet :address])
          to              (:dealer (:enquiry db))
          message         (pr-str (dissoc (:enquiry db) :open :lead-text :dealer :key))
-         ;; strEnc (u/getEncrypted (get-in db [:enquiry :key]) strClj)
          ks              (:keystore db)
          dealer-pubkey   (get-in db [:enquiry :key])
          encrypt-hd-path "m/0'/0'/1'"
