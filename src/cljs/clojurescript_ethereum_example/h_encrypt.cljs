@@ -75,8 +75,11 @@
                                                                       dealer-pubkey
                                                                       hd-path)]
                            (console :log "decrypted message:" decrypted-message)
-                           (console :log "quoted decrypted message:" (reader/read-string decrypted-message))
-                           (dispatch [:update-decrypted-message index decrypted-message]))))
+                           (if-not (false? decrypted-message)
+                             (do
+                               (console :log "quoted decrypted message:" (reader/read-string decrypted-message))
+                               (dispatch [:update-decrypted-message index decrypted-message]))
+                             (console :log "tweets[" index "]: cannot decrypt message.")))))
      db)))
 
 (reg-event-db
