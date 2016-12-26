@@ -242,12 +242,6 @@
  (fn [db [balance address]]
    (assoc-in db [:accounts address :balance] balance)))
 
-(reg-event-db
- :new-tweet/update
- interceptors
- (fn [db [key value]]
-   (assoc-in db [:new-tweet key] value)))
-
 (reg-event-fx
  :contract/fetch-compiled-code
  interceptors
