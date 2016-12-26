@@ -75,19 +75,6 @@
       (assoc response :session session)
       response)))
 
-(def dealers {(clojure.string/lower-case "0x39da12ffc0b7209e6f473a19074e785e42eb7555")
-              {:name "DEALER_A"
-               ;; :address "0xaaDC052Ee37f62889064b44F40D271441e18Be6e"
-               :key  "key01dealer"}
-              (clojure.string/lower-case "0x043b8174e15217f187de5629d219e78207f63dce")
-              {:name "DEALER_A"
-               ;; :address "0xaaDC052Ee37f62889064b44F40D271441e18Be6e"
-               :key  "key01dealer"}
-              (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
-              {:name "DEALER_B"
-               ;; :address "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3"
-               :key  "key02dealer"}})
-
 (defroutes routes
 
   (resources "/browser-solidity/" {:root "browser-solidity"})

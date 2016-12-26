@@ -40,9 +40,10 @@
          [:br]
          [:h3 "Balance: " (u/eth @balance)]
          (if (not (= @type "customer"))
-           [:h3 "Paied: " (if @payed
-                            "you are already paied."
-                            "you are not paied.")])
+           [:h3 "Payment status: " (if @payed
+                            "paied."
+                            [:span {:style {:color "red"
+                                            :font-weight "bold"}} "not paied."])])
          [ui/text-field {:default-value       @caddr
                          :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
                          :name                "ContractAddr"
