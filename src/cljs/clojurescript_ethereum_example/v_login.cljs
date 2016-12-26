@@ -67,6 +67,8 @@
           (set-item session-storage "keystore" (:keystore (:user res)))
           (.log js/console "password:" (:password @login))
           (set-item session-storage "password" (:password @login))
+          (set-item session-storage "type" (:type (:user res)))
+          (set-item session-storage "name" (:name (:user res)))
           (dispatch [:ui/web3 ks])
           (dispatch [:blockchain/my-addresses-loaded])
           (dispatch [:reload])

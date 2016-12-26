@@ -17,6 +17,7 @@
         my-addresses (subscribe [:db/my-addresses])
         balance      (subscribe [:new-tweet/selected-address-balance])
         payed        (subscribe [:db/payed])
+        registered   (subscribe [:db/registered])
         login        (subscribe [:db/login])
         type         (subscribe [:db/type])]
     (fn []
@@ -40,10 +41,17 @@
          [:br]
          [:h3 "Balance: " (u/eth @balance)]
          (if (not (= @type "customer"))
-           [:h3 "Payment status: " (if @payed
-                            "paied."
-                            [:span {:style {:color "red"
-                                            :font-weight "bold"}} "not paied."])])
+           [:div
+            [:h3 "Payment status: "
+             (if @payed
+               "paied."
+               [:span {:style {:color       "red"
+                               :font-weight "bold"}} "not paied."])]
+            [:h3 "Register status: "
+             (if @registered
+               "registered."
+               [:span {:style {:color       "red"
+                               :font-weight "bold"}} "not registered."])]])
          [ui/text-field {:default-value       @caddr
                          :on-change           #(dispatch [:ui/cAddrUpdate (u/evt-val %)])
                          :name                "ContractAddr"
@@ -56,13 +64,21 @@
            :style        {:margin-top 15}
            :on-touch-tap #(dispatch [:contract/abi-loaded @abi])}]
          (if (not (= @type "customer"))
-           [ui/raised-button
-            {:primary      true
-             :label        "Pay the publication fee"
-             :style        {:margin-top 15
-                            :margin-left 15}
-             :on-touch-tap #(dispatch [:publication-fee/pay])
-             }])]]])))
+           [:span
+            (if (not @registered)
+              [ui/raised-button
+               {:primary      true
+                :label        "Register dealer to blockchain"
+                :style        {:margin-top  15
+                               :margin-left 15}
+                :on-touch-tap #(dispatch [:dealer/register])
+                }])
+            [ui/raised-button
+             {:primary      true
+              :label        "Pay the publication fee"
+              :style        {:margin-top  15
+                             :margin-left 15}
+              :on-touch-tap #(dispatch [:publication-fee/pay])}]])]]])))
 
 (defn tweets-component []
   (let [tweets  (subscribe [:db/tweets])
@@ -74,8 +90,6 @@
         (if (not (= @type "customer"))
           (do
             [ui/paper {:style {:padding 20 :margin-top 20}}
-
-
              [:h2 "Messages"]
              (for [{:keys [tweet-key to message date from]} (filter #(not (nil? %)) @tweets)]
                [:div {:style {:margin-top 20}
@@ -91,5 +105,4 @@
               {:secondary    true
                :label        "decode msg"
                :style        {:margin-top 15}
-               :on-touch-tap #(dispatch [:decrypt/messages])}]]))
-        ]])))
+               :on-touch-tap #(dispatch [:decrypt/messages])}]]))]])))

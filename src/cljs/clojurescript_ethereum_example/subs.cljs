@@ -105,3 +105,8 @@
  :db/payed
  (fn [db]
    (:payed db)))
+
+(reg-sub
+ :db/registered
+ (fn [db]
+   (:registered db)))

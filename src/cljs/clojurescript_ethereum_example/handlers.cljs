@@ -60,23 +60,74 @@
       {:web3-fx.blockchain/fns {:web3 web3
                                 :fns  [[#(:my-addresses db)
                                         :blockchain/my-addresses-loaded
-                                        :log-error]]}
-       }))))
+                                        :log-error]]}}))))
 
 (reg-event-fx
- :contract/get-dealer
+ :dealer/register
  interceptors
- (fn [{:keys [db]} [[enquiry-count name address is-payed payed-amount]]]
-   (console :log "enquiry-count:" (.toNumber enquiry-count))
-   (console :log "name:" name)
-   (console :log "address:" address)
-   (console :log "is-payed:" is-payed)
+ (fn [{:keys [db]} []]
+   (console :log ":dealer/register")
+   (console :log ":dealer/register db: " db)
+   (let [web3         (:web3 db)
+         from         (get-in db [:new-tweet :address])
+         name         (get-in db [:login :name])
+         tx           {:from from
+                       :gasPrice (web3-eth/gas-price web3)}]
+     (console :log ":dealer/register transaction:" tx)
+     {:db (-> db
+              (assoc-in [:put-dealer :from] from)
+              (assoc-in [:put-dealer :name] name)
+              (assoc-in [:put-dealer :tx] tx))
+      :dispatch [:dealer/put-dealer-estmate-gas from name tx :dealer/put-dealer :log-error]})))
+
+(reg-event-fx
+ :dealer/put-dealer
+ interceptors
+ (fn [{:keys [db]} [err gas]]
+   (if-not (nil? err) (throw err))
+   (console :log ":dealer/put-dealer db:" (clj->js db))
+   (console :log ":dealer/put-dealer gas:" gas)
+   (let [from (get-in db [:put-dealer :from])
+         name (get-in db [:put-dealer :name])
+         tx   (get-in db [:put-dealer :tx])]
+     {:db db
+      :web3-fx.contract/state-fn
+      {:instance (:instance (:contract db))
+       :web3     (:web3 db)
+       :db-path  [:contract :put-dealer]
+       :fn       [:put-dealer from name (assoc tx :gas gas)
+                  :dealer/put-dealer-received
+                  :log-error
+                  :dealer/put-dealer-receipt-loaded]}})))
+
+(reg-event-fx
+ :dealer/put-dealer-estmate-gas
+ interceptors
+ (fn [{:keys [db]} [from name tx]]
    (let [contract (get-in db [:contract :instance])]
-     {:db       (-> db
-                    (assoc :payed  is-payed)
-                    (assoc :tweets (into [] (for [x (range 0 (.toNumber enquiry-count))] nil)))
-                    (assoc :tweetsNum 0))
-      :dispatch [:contract/get-enquiries [address (.toNumber enquiry-count)]]})))
+     (console :log ":dealer/put-dealer-estmate-gas from:" from)
+     (console :log ":dealer/put-dealer-estmate-gas name:" name)
+     (console :log ":dealer/put-dealer-estmate-gas tx:" (clj->js tx))
+     (.estimateGas (.-putDealer contract) from name tx #(dispatch [:dealer/put-dealer %1 %2]))
+     {:db db})))
+
+
+(reg-event-db
+ :dealer/put-dealer-received
+ interceptors
+ (fn [db [transaction-hash]]
+   (console :log "putDealer tx registered." transaction-hash)
+   db))
+
+(reg-event-db
+ :dealer/put-dealer-receipt-loaded
+ interceptors
+ (fn [db [{:keys [gas-used] :as transaction-receipt}]]
+   (console :log "Dealer was mined! like" transaction-receipt)
+   (when (= gas-used tweet-gas-limit)
+     (console :error "All gas used"))
+   db))
+
 
 (reg-event-fx
  :publication-fee/pay
@@ -93,14 +144,29 @@
                        :value value
                        :gasPrice (web3-eth/gas-price web3)}
          gas          (web3-eth/estimate-gas web3 tx)]
-     ;; a json with id.. would be a encrypted sencente.
-     (console :log "send transaction:" (clj->js (assoc tx :gas gas)))
+     (console :log ":publication-fee/pay send transaction:" (clj->js (assoc tx :gas gas)))
      (web3-eth/send-transaction! web3 (assoc tx :gas gas) (fn [err tx]
                                                             (console :log "err:" err)
                                                             (console :log "tx:" tx)
                                                             (dispatch [:reload])))
-     ;; after sending it as Tx, "(assoc-in [:enquery :text] nil)" should be done in confirmed callback.
      {:db db})))
+
+(reg-event-fx
+ :contract/get-dealer
+ interceptors
+ (fn [{:keys [db]} [[enquiry-count name address is-payed payed-amount]]]
+   (let [contract (get-in db [:contract :instance])
+         empty-address "0x0000000000000000000000000000000000000000"]
+     (console :log ":contract/get-dealer enquiry-count:" (.toNumber enquiry-count))
+     (console :log ":contract/get-dealer name:" name)
+     (console :log ":contract/get-dealer address:" address)
+     (console :log ":contract/get-dealer is-payed:" is-payed)
+     {:db       (-> db
+                    (assoc :payed  is-payed)
+                    (assoc :registered (not (= address empty-address)))
+                    (assoc :tweets (into [] (for [x (range 0 (.toNumber enquiry-count))] nil)))
+                    (assoc :tweetsNum 0))
+      :dispatch [:contract/get-enquiries [address (.toNumber enquiry-count)]]})))
 
 (reg-event-db
  :contract/get-enquiries
@@ -181,42 +247,6 @@
  interceptors
  (fn [db [key value]]
    (assoc-in db [:new-tweet key] value)))
-
-(reg-event-fx
- :new-tweet/send
- interceptors
- (fn [{:keys [db]} []]
-   (console :log "Send tweet to a contract at"
-            (get-in db [:contract :address]))
-   (let [{:keys [name text address]} (:new-tweet db)]
-     {:web3-fx.contract/state-fn
-      {:instance (:instance (:contract db))
-       :web3     (:web3 db)
-       :db-path  [:contract :send-tweet]
-       :fn       [:add-tweet (str/lower-case (str/lower-case name)) text
-                  {;; :value (web3/to-wei 0.02 "ether")
-                   :from address
-                   :gas  tweet-gas-limit}
-                  :new-tweet/confirmed
-                  :log-error
-                  :new-tweet/transaction-receipt-loaded]}})))
-
-(reg-event-db
- :new-tweet/confirmed
- interceptors
- (fn [db [transaction-hash]]
-   (assoc-in db [:new-tweet :sending?] true)
-   (assoc-in db [:new-tweet :text] "")
-   ))
-
-(reg-event-db
- :new-tweet/transaction-receipt-loaded
- interceptors
- (fn [db [{:keys [gas-used] :as transaction-receipt}]]
-   (console :log transaction-receipt)
-   (when (= gas-used tweet-gas-limit)
-     (console :error "All gas used"))
-   (assoc-in db [:new-tweet :sending?] false)))
 
 (reg-event-fx
  :contract/fetch-compiled-code
