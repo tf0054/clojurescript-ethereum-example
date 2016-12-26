@@ -19,7 +19,7 @@ contract carsensor {
     
     mapping (address => Dealer) public dealers;
     
-    address rAddress = 0x3c26ab7c9795d0d0507c05f7d6b1f13fe1f56827;
+    address rAddress = 0x62ded09e27f2876ce3e4fee8e3ae9f9448508415;
     
     function carsensor() {
         putDealer(rAddress, "Recruit");
@@ -54,6 +54,9 @@ contract carsensor {
     
     function () payable {
         Dealer dealer = dealers[msg.sender];
+        if (msg.value < 10000000000000000) {
+           throw;
+        }
         dealer.isPayed = true;
         dealers[msg.sender] = dealer;
     }

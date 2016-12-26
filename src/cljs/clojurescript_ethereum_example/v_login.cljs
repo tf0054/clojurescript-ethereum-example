@@ -26,7 +26,7 @@
     (.createVault keystore (clj->js {:password (:password @login)})
                   (fn [err ks]
                     (if-not (nil? err) (throw err))
-                    (let [login         (subscribe [:db/login])]
+                    (let [login (subscribe [:db/login])]
                       (.keyFromPassword ks (:password @login)
                                         (fn [err pw-derived-key]
                                           (if-not (nil? err)
@@ -43,7 +43,9 @@
                                                                    :password (:password @login)
                                                                    :keystore (.serialize ks)
                                                                    :pubkey   (first (.getPubKeys ks "m/0'/0'/1'"))
-                                                                   :type     type}
+                                                                   :type     type
+                                                                   :name     (first (clojure.string/split (:email @login) "@"))
+                                                                   :address  (str "0x" (first (.getAddresses ks)))}
                                                  :handler         (fn [res] (.log js/console res))
                                                  :response-format :json
                                                  :keywords?       true}))))))))

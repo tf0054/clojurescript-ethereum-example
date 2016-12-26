@@ -68,8 +68,9 @@
                     ;; Dealer   0x1c90b30e6fa89fe54801989b17dc8d985f2a2e81
                     ;; Dealer2  0x56fcc45350aaf6abbb555ee32cc4324f25485e32
                     ;; Customer 0xabc24d2e0db6b3b1b548488d6d4d4264e652bc11
-                    
-                    :address  "0x717579347713f18c2e874b2679bb48625626a554" ;; 多分これ
+
+                    :address     "0xb60de77197be8434d230790a72881500565d598e"
+                    ;; :address  "0x717579347713f18c2e874b2679bb48625626a554"
                     ;; :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
                     }
    :drawer         {:open false}
@@ -94,12 +95,12 @@
                      :name   "Fiat punto"
                      :price  3000000
                      :image  "/images/car003.jpg"
-                     :dealer (str/lower-case "0x56fcc45350aaf6abbb555ee32cc4324f25485e32")}
+                     :dealer (str/lower-case "0x4829028a81a3379074cd72cb2bb598339a5dc71c")}
                     {:id     "car004"
                      :name   "Fiat punto"
                      :price  4000000
                      :image  "/images/car004.jpg"
-                     :dealer (str/lower-case "0x56fcc45350aaf6abbb555ee32cc4324f25485e32")}
+                     :dealer (str/lower-case "0x4829028a81a3379074cd72cb2bb598339a5dc71c")}
                     ]
    :user           {:id       "0x"
                     :name     "Geroge"
