@@ -47,63 +47,6 @@
  (fn [db [x]]
    (assoc-in db [:contract :address] x)))
 
-#_(reg-event-db
- :ui/loginEmailUpdate
- interceptors
- (fn [db [x]]
-   (assoc-in db [:login :email] x)))
-
-#_(reg-event-db
- :ui/loginPasswordUpdate
- interceptors
- (fn [db [x]]
-   (assoc-in db [:login :password] x)))
-
-#_(reg-event-db
- :ui/login
- interceptors
- (fn [db [user]]
-   (console :log "type:" (:type user))
-   (-> db
-       (assoc-in [:login :name] (:name user))
-       (assoc :type (:type user))
-       (assoc :page 0))))
-
-#_(reg-event-db
- :ui/logout
- interceptors
- (fn [db]
-   (remove-item session-storage "keystore")
-   (-> db
-       (assoc :type "customer")
-       (dissoc :keystore)
-       (assoc :page 3))))
-
-#_(reg-event-db
- :ui/register-type
- interceptors
- (fn [db [type]]
-   (assoc db :register-type type)))
-
-
-#_(reg-event-db
- :ui/web3
- interceptors
- (fn [db [ks]]
-   (let [ks        ks
-         provider  (js/HookedWeb3Provider. (clj->js {:host db/rpc-url :transaction_signer ks}))
-         web3      (js/Web3.)
-         addresses (map #(str "0x" %) (js->clj (.getAddresses ks)))]
-     (web3/set-provider web3 provider)
-     (set! (.-accounts (.-eth web3)) (.getAddresses ks))
-     (set! (.-getAccounts (.-eth web3)) #(.getAddresses ks))
-     (-> db
-         (assoc :keystore ks)
-         (assoc :my-addresses addresses)
-         (assoc :web3 web3)
-         (assoc :provides-web3? true)))) )
-
-
 (reg-event-fx
  :ui/cInstUpdate
  interceptors
