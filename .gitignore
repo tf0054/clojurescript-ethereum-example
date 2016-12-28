@@ -7,3 +7,5 @@ out
 /.idea/
 /.nrepl-port
 /clojurescript-ethereum-example.iml
+/.*
+/*~
