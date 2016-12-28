@@ -35,9 +35,10 @@
  interceptors
  (fn [db _]
    (if-let [ch (get-in db [:monitor :rtc :conn])]
-     (go (let [pingObj (clj->js {:event "ping"})]
+     (go (let [pingObj (clj->js {:event "ping"})
+               test (u/timeout (* 20 1000))]
            (>! ch pingObj)
-           (<! (u/timeout (* 20 1000))) )
+           (<! test) )
          (dispatch [:dev/etherscan-loop-ping]) ))
    db
    ))
@@ -59,9 +60,12 @@
  :dev/update-latest
  interceptors
  (fn [db [x]]
-   (-> db
-       (assoc-in [:monitor :latest-block] (:num x))
-       (assoc-in [:monitor :sec-old] 0) )))
+   (if (= (:num x) -1)
+     (assoc-in db [:monitor :sec-old] 0)
+     (-> db
+         (assoc-in [:monitor :latest-block] (:num x))
+         (assoc-in [:monitor :sec-old] 0)) )
+   ))
 
 (defn filterIds [db x]
    (not-every? false?
@@ -237,3 +241,22 @@
        db
        ))
    )) 
+
+(reg-event-fx
+ :dev/changeTab
+ interceptors
+ (fn [{:keys [db]} [x]]
+   (console :log "tab:" x)
+   {:db (assoc-in db [:monitor :tab-val] x)}
+   ;;   
+   ))
+
+(reg-event-db
+ :dev/changeView
+ interceptors
+ (fn [db _]
+   (console :log "changeView")
+   (case (get-in db [:monitor :display])
+     0 (assoc-in db [:monitor :display] 1)
+     1 (assoc-in db [:monitor :display] 0))
+   ))

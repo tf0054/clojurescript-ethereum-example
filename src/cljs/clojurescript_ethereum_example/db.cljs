@@ -73,6 +73,8 @@
                     :num-old nil
                     :tmp ""
                     :latest-block 0
+                    :tab-val "a"
+                    :display 0
                     :found {}
                     :targets ["0x39c4b70174041ab054f7cdb188d270cc56d90da8"
                               "0x043b8174e15217f187de5629d219e78207f63dce"

@@ -42,8 +42,8 @@
             [lein-shell "0.5.0"]
             [lein-pprint "1.1.2"]
             [deraen/lein-less4j "0.6.0"]
-            [cider/cider-nrepl "0.14.0"]
-            [refactor-nrepl "2.2.0"]
+            [cider/cider-nrepl "0.15.0-SNAPSHOT"]
+            [refactor-nrepl "2.3.0-SNAPSHOT"]
             ]
 
   :min-lein-version "2.5.3"
@@ -111,7 +111,7 @@
                                             :externs ["resources/public/js/stomp/externs.js"]
                                             :closure-defines {goog.DEBUG false}
                                             :pretty-print    false
-}}
+                                            }}
                             ]}
 
     }}
@@ -129,5 +129,5 @@
                                                         :closure-defines {goog.DEBUG false}
                                                         :pretty-print    true
                                                         :pseudo-names    true}}}}
-  })
+            })
 

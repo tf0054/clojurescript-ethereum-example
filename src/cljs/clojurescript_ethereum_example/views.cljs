@@ -55,34 +55,36 @@
         (if (not= 3 @page)
           [:div
            [ui/app-bar {:title                    "Blockchain DEMO: \"carsensor.net\""
-                        :onLeftIconButtonTouchTap #(do (dispatch [:ui/drawer]))
-                        }]          
+                        :onLeftIconButtonTouchTap #(dispatch [:ui/drawer])}]          
            [drawer-component] ]
-          [ui/app-bar {:title                    "Ethereum Tx monitor for ROPSTEN TESTNET"}]
+          [:div
+           [ui/app-bar {:title                    "Ethereum Tx monitor for ROPSTEN TESTNET"}]
+           
+           ]
           )
-          
-          ;; default
-          [:div (display @page 0)
-           [v_twitter/new-tweet-component]
-           [v_twitter/tweets-component]
-           ]
-          ;; development
-          [:div (display @page 1)
-           [v_dev/dev-component0]
-           ;;[v_dev/dev-component1]
-           [v_dev/dev-component2]
-           ;;[v_dev/dev-component3]
-           ]
-          ;; list
-          [:div (display @page 2)
-           [v_list/enquiry-component]
-           [v_list/list-component] 
-           ]
-          ;; list
-          [:div (display @page 3)
-           [v_monitor/component0]
-           ;;[v_monitor/component1]
-           ]
+        
+        ;; default
+        [:div (display @page 0)
+         [v_twitter/new-tweet-component]
+         [v_twitter/tweets-component]
+         ]
+        ;; development
+        [:div (display @page 1)
+         [v_dev/dev-component0]
+         ;;[v_dev/dev-component1]
+         [v_dev/dev-component2]
+         ;;[v_dev/dev-component3]
+         ]
+        ;; list
+        [:div (display @page 2)
+         [v_list/enquiry-component]
+         [v_list/list-component] 
+         ]
+        ;; list
+        [:div (display @page 3)
+         [v_monitor/component0]
+         ;;[v_monitor/component1]
+         ]
 
-          ]])))
+        ]])))
 

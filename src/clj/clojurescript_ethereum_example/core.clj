@@ -13,8 +13,7 @@
 (def ^:dynamic *server*)
 
 ;; For browser
-(def users {
-            (clojure.string/lower-case "0x39c4B70174041AB054f7CDb188d270Cc56D90da8")
+(def users {(clojure.string/lower-case "0x39c4B70174041AB054f7CDb188d270Cc56D90da8")
             {:role "RTC"}
             (clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
             {:role "DEALER"
