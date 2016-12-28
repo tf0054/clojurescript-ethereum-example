@@ -57,14 +57,6 @@
 
   :aliases {"compile-solidity" ["shell" "./compile-solidity.sh"]}
 
-  ;; :repl {
-  ;;        :repl-options {:port 8320
-  ;;                       :init (do (require 'dirac.agent)
-  ;;                                 (dirac.agent/boot!))
-  ;;                       :nrepl-middleware [dirac.nrepl/middleware
-  ;;                                          ]}
-  ;;        }
-  ;;cemerick.piggieback/wrap-cljs-repl
 
   :less {:source-paths ["resources/public/less"]
          :target-path  "resources/public/css"
