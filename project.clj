@@ -25,6 +25,7 @@
                  [ring/ring-defaults "0.3.0-beta1"]
                  [ring/ring-devel "1.6.0-beta5"]
                  [io.github.theasp/simple-encryption "0.1.0"]
+                 [binaryage/dirac "RELEASE"]
                  ]
 
   :plugins [[lein-auto "0.1.2"]
@@ -48,7 +49,15 @@
 
   :aliases {"compile-solidity" ["shell" "./compile-solidity.sh"]}
 
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  :repl-options {
+                 :nrepl-middleware [dirac.nrepl/middleware
+                                    cemerick.piggieback/wrap-cljs-repl
+                                    ]
+                 :port             8230
+                 :init             (do
+                                     (require 'dirac.agent)
+                                     (dirac.agent/boot!))
+                 }
 
   :less {:source-paths ["resources/public/less"]
          :target-path  "resources/public/css"
@@ -59,12 +68,15 @@
   :uberjar-name "clojurescript-ethereum-example.jar"
 
   :profiles
-  {:dev
-   {:dependencies [[binaryage/devtools "0.8.2"]
+  {:dev           [:dev-org :dev-overrides]
+   :dev-overrides {:env {:api-keys "test"}}
+   :dev-org
+   {:dependencies [[binaryage/devtools "0.8.3"]
                    [com.cemerick/piggieback "0.2.1"]
                    [figwheel-sidecar "0.5.8"]
-                   [org.clojure/tools.nrepl "0.2.11"]]
-    :plugins      [[lein-figwheel "0.5.8"]]
+                   [org.clojure/tools.nrepl "0.2.12"]]
+    :plugins      [[lein-figwheel "0.5.8"]
+                   [lein-environ "1.1.0"]]
     :source-paths ["env/dev"]
     :cljsbuild    {:builds [{:id           "dev"
                              :source-paths ["src/cljs"]

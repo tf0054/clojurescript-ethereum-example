@@ -79,14 +79,6 @@
                                (assoc-in [:contract :instance] contract-instance)
                                (assoc-in [:tweets] nil))]
      {:db db
-      ;; :web3-fx.contract/events
-      ;; {:instance contract-instance
-      ;;  :db       db
-      ;;  :db-path  [:contract :events]
-      ;;  :events   [[:on-tweet-added
-      ;;              {}
-      ;;              {:from-block 0} :contract/on-tweet-loaded :log-error]]}
-
       :web3-fx.contract/events
       {:instance contract-instance
        :db       db

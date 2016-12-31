@@ -40,7 +40,7 @@
   ;; DEALER KEY
   (GET "/key/:id/:num" [id num];; "/dealers/" isnt dealt with.
        {:status  200
-        :headers {"Content-Type" "text/html; charset=utf-8"}
+        :headers {"Content-Type" "application/json"}
         :body    (json/generate-string
                   (if (nil? (and id (get dealers id)))
                     {}
@@ -52,7 +52,7 @@
        (let [id (clojure.string/lower-case raw_id)]
          (println "dealers: " id)
          {:status  200
-          :headers {"Content-Type" "text/html; charset=utf-8"}
+          :headers {"Content-Type" "application/json"}
           :body    (json/generate-string
                     (if (nil? (and id (get dealers id)))
                       {}
@@ -64,7 +64,7 @@
        (let [id (clojure.string/lower-case raw_id)]
          (println "users: " id)
          {:status  200
-          :headers {"Content-Type" "text/html; charset=utf-8"}
+          :headers {"Content-Type" "application/json"}
           :body    (json/generate-string
                     (if (nil? (and id (get users id)))
                       {}
@@ -73,6 +73,14 @@
   
   (GET "/js/*" _
        {:status 404})
+
+  ;; ENV
+  (GET "/env/:id" [id]
+       (if-let [key (env (keyword id))]
+         {:status  200
+          :headers {"Content-Type" "application/json"}
+          :body    (str "{" id ":\"" key "\"}")}
+         {:status 404})) ;; DEBUG
 
   (GET "/cors" _
        {:status  200

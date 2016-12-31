@@ -1,22 +1,10 @@
 (ns clojurescript-ethereum-example.h-list
-  (:require
-   [clojure.string :as str]
-   [cljs.reader :as reader]
-   [ajax.core :as ajax]
-   [cljs-web3.core :as web3]
-   [cljs-web3.eth :as web3-eth]
-   [cljs-web3.personal :as web3-personal]
-   [cljsjs.web3]
-   [clojurescript-ethereum-example.db :as db]
-   [day8.re-frame.http-fx]
-   [cljs-react-material-ui.reagent :as ui]
-   [goog.string :as gstring]
-   [goog.string.format]
-   [madvas.re-frame.web3-fx]
-   [re-frame.core :refer [reg-event-db reg-event-fx path trim-v after debug reg-fx console dispatch]]
-   [clojurescript-ethereum-example.utils :as u]
-   )
-  )
+  (:require [cljs-react-material-ui.reagent :as ui]
+            [clojure.string :as str]
+            [clojurescript-ethereum-example.utils :as u]
+            [re-frame.core
+             :refer
+             [console dispatch reg-event-db reg-event-fx trim-v]]))
 
 (def interceptors [#_(when ^boolean js/goog.DEBUG debug)
                    trim-v])

@@ -10,12 +10,14 @@
    [clojurescript-ethereum-example.h-encrypt]
    [clojurescript-ethereum-example.subs]
    [clojurescript-ethereum-example.views :as views]
-   [print.foo.preloads.devtools]
    [re-frame.core :as re-frame]
    [reagent.core :as reagent]
+   [dirac.runtime]
    ))
 
 (enable-console-print!)
+
+(dirac.runtime/install!)
 
 (defn mount-root []
   (reagent/render [views/main-panel]
