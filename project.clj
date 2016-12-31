@@ -1,15 +1,17 @@
 (defproject clojurescript-ethereum-example "0.1.0-SNAPSHOT"
   :dependencies [[bk/ring-gzip "0.1.1"]
-                 [cljs-ajax "0.5.8"]
+                 [cljs-ajax "0.5.8"
+                  :exclusions [commons-codec]]
                  [cljs-react-material-ui "0.2.22"]
                  [cljs-web3 "0.16.0-0"]
                  [cljsjs/bignumber "2.1.4-1"]
                  [cljsjs/react-flexbox-grid "0.10.2-1"
                   :exclusions [cljsjs/react]]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
-                 [compojure "1.6.0-beta1"]
+                 [compojure "1.6.0-beta2"
+                  :exclusions [commons-codec]]
                  [day8.re-frame/http-fx "0.0.4"]
-                 [environ "1.0.3"]
+                 [environ "1.1.0"]
                  [http-kit "2.2.0"]
                  [cheshire "5.6.3"]
                  [madvas.re-frame/web3-fx "0.1.0"]
@@ -24,14 +26,17 @@
                  [ring/ring-core "1.6.0-beta5"]
                  [ring/ring-defaults "0.3.0-beta1"]
                  [ring/ring-devel "1.6.0-beta5"]
-                 [io.github.theasp/simple-encryption "0.1.0"]
+                 [io.github.theasp/simple-encryption "0.1.0"
+                  :exclusions [com.taoensso/timbre]]
+                 [com.taoensso/timbre "4.7.4"]
                  [binaryage/dirac "RELEASE"]
                  ]
 
   :plugins [[lein-auto "0.1.2"]
-            [lein-cljsbuild "1.1.4"]
+            [lein-cljsbuild "1.1.5"
+             :exclusions [org.clojure/clojure]]
             [lein-shell "0.5.0"]
-            [deraen/lein-less4j "0.5.0"]]
+            [deraen/lein-less4j "0.6.0"]]
 
   :min-lein-version "2.5.3"
   :main clojurescript-ethereum-example.core
