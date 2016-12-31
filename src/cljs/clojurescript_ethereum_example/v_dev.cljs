@@ -87,7 +87,14 @@
           {:secondary    true
            :label        "Connect"
            :style        {:margin-top 15}
-           :on-touch-tap #(dispatch [:dev/etherscan-connect])
+           :on-touch-tap #(dispatch [:dev/start-test-filter])
+           }]
+         [ui/raised-button
+          {:secondary    true
+           :label        "Disonnect"
+           :style        {:margin-left 5
+                          :margin-top 15}
+           :on-touch-tap #(dispatch [:dev/etherscan-disconnect])
            }]
          [:br]         
          ]]])))

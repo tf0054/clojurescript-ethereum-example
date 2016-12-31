@@ -48,3 +48,7 @@
 (defn getDecrypted [key evalue] 
   (let [kdf (se/new-pbkdf2 key :aes-256-cbc)]
     (se/decrypt-with kdf (getFakeDec evalue))))
+
+(defn timeout [ms]
+  (let [c (chan)]
+    (js/setTimeout (fn [] (close! c)) ms) c))

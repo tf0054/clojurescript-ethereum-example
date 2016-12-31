@@ -26,7 +26,7 @@
                     :instance nil
                     ;; :address  "0x1a962b69f59b6879a0c25874aa86f8f2658aa368"
                     ;; :address  "0x7B51E82Cbeed5732845CFDFe58CFE9099a61d5De"
-                    :address  "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00"
+                    :address  (str/lower-case "0xa330C8Ca0e63e95ec56012aF375EDc24999b4c00")
                     }
    :drawer         {:open false}
    :page           0
@@ -68,9 +68,11 @@
                     :dealer    nil
                     :text      nil
                     :key       nil}
-   :monitor        {:rtc {:conn    nil
-                          :address nil
+   :monitor        {:conn    nil
+                    :rtc {:address nil
                           :role    nil
                           :amount  nil
-                          :update  nil}}
+                          :update  nil}
+                    :dealer01 nil
+                    :customer01 nil}
    })

@@ -6,7 +6,9 @@
             [clojure.string :as str]
             [re-frame.core :refer [console dispatch reg-event-db reg-event-fx trim-v]]
             [chord.client :refer [ws-ch]]
-            [cljs.core.async :refer [chan <! >! put! close!]])
+            [cljs.core.async :refer [chan <! >! put! close!]]
+            [clojurescript-ethereum-example.utils :as u]
+            )
   (:import goog.net.Jsonp
            goog.Uri))
 
@@ -61,16 +63,7 @@
          ]
      (-> db
          (assoc-in [:dev :address] val)
-         (assoc-in [:dev :enc]
-                   val
-                   ;; (str encStr "^ "
-                   ;;      (u/getDecrypted
-                   ;;       ;;(get-in db [:new-tweet :address])
-                   ;;       "tf0054"
-                   ;;       encStr) "^ "
-                   ;;      (get-in db [:new-tweet :address])
-                   ;;      )
-                   )))))
+         (assoc-in [:dev :enc] val)) )))
 
 (reg-event-db
  :ui/amountNum
@@ -139,10 +132,66 @@
    ))
 
 (reg-event-db
+ :dev/etherscan-loop-listen
+ interceptors
+ (fn [db _]
+   (if-let [ch (get-in db [:monitor :rtc :conn])]
+     (go (let [raw (<! ch)
+               x (:message (js->clj raw))]
+           (console :log "etherscan update:" x "," raw)
+           (if (= "subscribe-txlist" (:event x))
+             (dispatch [:dev/etherscan-update "rtc" x]))
+           (<! (u/timeout 500)) )
+         (dispatch [:dev/etherscan-loop-listen]) ))
+   db
+   ))
+
+(reg-event-db
+ :dev/etherscan-loop-ping
+ interceptors
+ (fn [db _]
+   (if-let [ch (get-in db [:monitor :rtc :conn])]
+     (go (let [pingObj (clj->js {:event "ping"})]
+           (>! ch pingObj)
+           (<! (u/timeout (* 20 1000))) )
+         (dispatch [:dev/etherscan-loop-ping]) ))
+   db
+   ))
+
+(reg-event-db
+ :dev/etherscan-init
+ interceptors
+   (fn [db [ch]]
+     (go (let [regiObj (clj->js
+                        {:event   "txlist"
+                         :address (str/lower-case
+                                   "0x78348AA884Cb4b4619514e728631742AE8Dd9927")})]
+         (>! ch regiObj)) )
+     (dispatch [:dev/etherscan-loop-listen])
+     (dispatch [:dev/etherscan-loop-ping])
+     (assoc-in db [:monitor :rtc :conn] ch)))
+
+(defn filterIds [db x]
+  (if (or
+       (= x (get-in db [:contract :address]))
+       (= x (get-in db [:new-tweet :address])) ;; Metamask
+       (= x "0x39c4b70174041ab054f7cdb188d270cc56d90da8") ;; RTC
+       (= x "0x043b8174e15217f187de5629d219e78207f63dce") ;; DEALER01
+       (= x "0x78348aa884cb4b4619514e728631742ae8dd9927") ;; CUSTOMER01
+       )
+    true
+    false) )
+
+(reg-event-db
  :dev/etherscan-update
  interceptors
- (fn [db [ch]]
-   (assoc-in db [:monitor :rtc :conn] ch)))
+ (fn [db [id x]]
+   (console :log "start-test-update" id)
+   (if (filterIds db (str "0x" id))
+     (assoc-in db [:monitor (keyword id) :amount] x)
+     (do (console :log "Filtered Tx:" id)
+         db))
+   ))
 
 (reg-event-db
  :dev/etherscan-connect
@@ -150,10 +199,50 @@
  (fn [db _]
    (go
      (console :log "dev/etherscan-connect:")
-     (let [x     (<! (ws-ch "ws://socket.etherscan.io/wshandler" {:format :json-kw}))
+     (let [x     (<! (ws-ch "ws://socket.etherscan.io/wshandler"
+                            ;;"ws://socket.testnet.etherscan.io/wshandler"
+                            {:format :json-kw}))
            ch    (:ws-channel x)
            error (:error x)]
        (if-not error
-         (dispatch [:dev/etherscan-update ch])
+         (dispatch [:dev/etherscan-init ch])
          (js/console.log "Error:" (pr-str error)))) )
    db))
+
+(reg-event-db
+ :dev/etherscan-disconnect
+ interceptors
+ (fn [db _]
+   ;; stompClient
+   (.disconnect (get-in db [:monitor :conn]))
+   ;; maintain db
+   (-> db
+       (assoc-in [:monitor :conn] nil)
+       ;;(assoc-in [:monitor :rtc :amount] nil)
+       )
+   ))
+
+(defn callbackTx [msg]
+  (let [w (.-body msg)
+        y (js->clj (.parse js/JSON w)
+                   :keywordize-keys true)]
+    ;; cannot have filters here bc here is a inside callback and having no fresh db
+    (dispatch [:dev/etherscan-update (:to y) y])) )
+
+(reg-event-db
+ :dev/start-test-filter
+ interceptors
+ (fn [db _]
+   (console :log "start-test-filter")
+   (let [socket (new js/SockJS "http://localhost:8080/websocket")
+         stompClient (.over js/Stomp socket)]
+
+     (set! (.-onopen socket) #(console :log "socketjs open."))
+     (set! (.-onmessage socket) #(console :log (str "socketjs msg:" %)))
+     (set! (.-onclose socket) #(console :log "socketjs close."))
+
+     (.connect stompClient (clj->js {})
+               (fn [frame]
+                 (.subscribe stompClient "/topic/tx" callbackTx)) )
+     ;;
+     (assoc-in db [:monitor :conn] stompClient) )))
