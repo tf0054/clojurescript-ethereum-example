@@ -6,6 +6,7 @@
             [io.github.theasp.simple-encryption :as se]
             [goog.crypt.base64 :as b64]
             [cljs.reader :as reader]
+            [cljs.core.async :refer [chan <! >! put! close!]]
             ))
 
 (defn truncate
@@ -52,3 +53,7 @@
 (defn timeout [ms]
   (let [c (chan)]
     (js/setTimeout (fn [] (close! c)) ms) c))
+
+(defn epochSecToDate [sec]
+  (let [x (new js/Date 0)]
+    (new js/Date (.setUTCSeconds x sec))) )

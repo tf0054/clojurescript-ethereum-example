@@ -15,7 +15,7 @@
                  [http-kit "2.2.0"]
                  [cheshire "5.6.3"]
                  [madvas.re-frame/web3-fx "0.1.0"]
-                 [medley "0.8.3"]
+                 [medley "0.8.4"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.229"]
                  [print-foo-cljs "2.0.3"]
@@ -29,6 +29,8 @@
                  [io.github.theasp/simple-encryption "0.1.0"
                   :exclusions [com.taoensso/timbre]]
                  [com.taoensso/timbre "4.7.4"]
+                 [jarohen/chord "0.7.0"
+                  :exclusions [commons-codec org.clojure/core.async]]
                  [binaryage/dirac "RELEASE"]
                  ]
 

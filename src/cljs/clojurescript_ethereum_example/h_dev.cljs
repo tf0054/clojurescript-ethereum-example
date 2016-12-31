@@ -172,24 +172,18 @@
      (assoc-in db [:monitor :rtc :conn] ch)))
 
 (defn filterIds [db x]
-  (if (or
-       (= x (get-in db [:contract :address]))
-       (= x (get-in db [:new-tweet :address])) ;; Metamask
-       (= x "0x39c4b70174041ab054f7cdb188d270cc56d90da8") ;; RTC
-       (= x "0x043b8174e15217f187de5629d219e78207f63dce") ;; DEALER01
-       (= x "0x78348aa884cb4b4619514e728631742ae8dd9927") ;; CUSTOMER01
-       )
-    true
-    false) )
+  (if (not-every? false?
+                  (map #(= x %) (get-in db [:monitor :targets])))
+    true false) )
 
 (reg-event-db
  :dev/etherscan-update
  interceptors
  (fn [db [id x]]
    (console :log "start-test-update" id)
-   (if (filterIds db (str "0x" id))
-     (assoc-in db [:monitor (keyword id) :amount] x)
-     (do (console :log "Filtered Tx:" id)
+   (if (filterIds db id)
+     (assoc-in db [:monitor :found (keyword id)] x)
+     (do (console :log "Ignored Tx:" id)
          db))
    ))
 
@@ -217,12 +211,25 @@
    (.disconnect (get-in db [:monitor :conn]))
    ;; maintain db
    (-> db
-       (assoc-in [:monitor :conn] nil)
-       ;;(assoc-in [:monitor :rtc :amount] nil)
-       )
+       (assoc-in [:monitor :conn] nil))
    ))
 
-(defn callbackTx [msg]
+(defn connectTx [strUrl regObj]
+  (let [socket (new js/SockJS strUrl)
+        stompClient (.over js/Stomp socket)]
+    (.connect stompClient
+              ;; headers for stomp
+              (clj->js {})
+              ;; success callback
+              (fn [frame] (.subscribe stompClient (:uri regObj) (:callback regObj)) )
+              ;; error callback
+              (fn [] (go (<! (u/timeout 1500))
+                         (console :log "(Reconnect in 3000 ms)")
+                         (<! (u/timeout 1500))
+                         (connectTx strUrl regObj))) )
+    stompClient))
+
+ (defn callbackTx [msg]
   (let [w (.-body msg)
         y (js->clj (.parse js/JSON w)
                    :keywordize-keys true)]
@@ -234,15 +241,12 @@
  interceptors
  (fn [db _]
    (console :log "start-test-filter")
-   (let [socket (new js/SockJS "http://localhost:8080/websocket")
-         stompClient (.over js/Stomp socket)]
+   (let [stompClient (connectTx "http://localhost:8080/websocket"
+                                {:uri "/topic/tx" :callback callbackTx})]
 
-     (set! (.-onopen socket) #(console :log "socketjs open."))
-     (set! (.-onmessage socket) #(console :log (str "socketjs msg:" %)))
-     (set! (.-onclose socket) #(console :log "socketjs close."))
-
-     (.connect stompClient (clj->js {})
-               (fn [frame]
-                 (.subscribe stompClient "/topic/tx" callbackTx)) )
-     ;;
-     (assoc-in db [:monitor :conn] stompClient) )))
+     (-> db
+         ;; reset monitor lists with target addresses
+         (assoc-in [:monitor :found]
+                   (reduce merge (map #(hash-map (keyword %) {:to %})
+                                      (get-in db [:monitor :targets]) )) )
+         (assoc-in [:monitor :conn] stompClient)) )))

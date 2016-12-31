@@ -69,10 +69,9 @@
                     :text      nil
                     :key       nil}
    :monitor        {:conn    nil
-                    :rtc {:address nil
-                          :role    nil
-                          :amount  nil
-                          :update  nil}
-                    :dealer01 nil
-                    :customer01 nil}
+                    :found {}
+                    :targets ["0x39c4b70174041ab054f7cdb188d270cc56d90da8"
+                              "0x043b8174e15217f187de5629d219e78207f63dce"
+                              "0x78348aa884cb4b4619514e728631742ae8dd9927"]
+                    }
    })
