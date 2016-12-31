@@ -3,7 +3,6 @@
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
    [reagent.core :as r]
-   [clojurescript-ethereum-example.address-select-field :refer [address-select-field]]
    [cljs-react-material-ui.reagent :as ui]
    [cljs-react-material-ui.core :refer [get-mui-theme color]]
    [clojurescript-ethereum-example.utils :as u]))
@@ -11,15 +10,15 @@
 (def col (r/adapt-react-class js/ReactFlexboxGrid.Col))
 (def row (r/adapt-react-class js/ReactFlexboxGrid.Row))
 
-(defn enquery-component []
-  (let [enquery (subscribe [:db/enquery])]
+(defn enquiry-component []
+  (let [enquiry (subscribe [:db/enquiry])]
     (fn []
       [ui/dialog {;; :title "test dialog"
-                  :open  (:open @enquery)
+                  :open  (:open @enquiry)
                   :modal true}
-       (:lead-text @enquery)
+       (:lead-text @enquiry)
        [ui/text-field {:default-value       "test" ;;(:name @new-tweet)
-                       :on-change           #(dispatch [:enquery/update (u/evt-val %)])
+                       :on-change           #(dispatch [:enquiry/update (u/evt-val %)])
                        :name                "name"
                        ;; :max-length          (:max-name-length @settings)
                        :floating-label-text "Message to dealer"
@@ -27,7 +26,7 @@
        [:div {:style {:text-align "right"}}
         [ui/flat-button {:label        "Submit"
                          :primary      true
-                         :on-touch-tap #(dispatch [:enquery/send])}] ]
+                         :on-touch-tap #(dispatch [:enquiry/send])}] ]
        ]
       ))
   )
@@ -38,7 +37,7 @@
       [row
        [col {:xs 12 :sm 12 :md 10 :lg 6 :md-offset 1 :lg-offset 3}
         [ui/paper {:style {:padding 20 :margin-top 15}}
-         [:h1 "cars"]
+         [:h1 "Cars"]
          (for [{:keys [id name price image dealer]} @cars]
            [:div {:style {:margin-top 20
                           :height     120}
@@ -47,12 +46,10 @@
                    :height 110}]
             [ui/raised-button
              {:secondary    true
-              :label        "Enquery"
+              :label        "Enquiry"
               :style        {:margin-top 15
                              :float      "right"}
-              :on-touch-tap #(do
-                               ;;(println ":;::" id)
-                               (dispatch [:ui/enquery id name price dealer]))
+              :on-touch-tap #(dispatch [:ui/enquiry id name price dealer])
               }]
             [:div {:style {:float         "right"
                            :padding-right 80}}
