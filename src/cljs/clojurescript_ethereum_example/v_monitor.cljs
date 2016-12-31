@@ -23,11 +23,12 @@
         [ui/paper {:style {:padding 20 :margin-top 15  :margin-bottom 15}}
          ;;{:style {:padding "0 20px 20px"}}
          ;;(pr-str (:graph @monitor) "***" (clj->js (:graph @monitor)) )
-         [:h4 {:style {:text-align "right"}} "THE LATEST BLOCK: " (mkAHref
-                                                                  "https://testnet.etherscan.io/tx/"
-                                                                  (:latest-block @monitor))
+         [:h4 {:style {:text-align "right"}}
+          "THE LATEST BLOCK: " (mkAHref
+                                "https://testnet.etherscan.io/tx/"
+                                (:latest-block @monitor))
           " (processed " (:sec-old @monitor) " sec ago)" [:br]
-          (get-in @monitor [:graph :tmp-count]) " Tx found."]
+          (get-in @monitor [:graph :tmp-count]) " Tx found in 10 sec."]
 
          ;; Num of Tx GRAPH
          [:div {:style {:text-align "center"}}
@@ -52,7 +53,7 @@
             :on-touch-tap #(dispatch [:dev/add-target])
             }] ]
          ;;
-         [ui/divider {:style {:margin-top 10}}]
+         [ui/divider {:style {:margin-top 30}}]
          (doall (map (fn [key]
                        [:div {:key (name key)}
                         [ui/table
@@ -64,15 +65,16 @@
                                                     :style {:padding-left 0
                                                             :font-size 14}}
                             [:span {:style {:font-family ["Lekton" "monospace"]}}
-                             [:span {:style {:font-size "1.7em"}} "TO: "]
+                             [:span {:style {:font-size "1.7em" 
+                                             :color "black"}} "TO:"]
                              (let [x (name key)
                                    uri "https://testnet.etherscan.io/address/"]
                                [:a {:href   (str uri x)
-                                    :target "_blank"
-                                    }
-                                (subs x 0 2)
-                                [:span {:style {:font-size "1.7em"}} (subs x 2 6)]
-                                (subs x 6)
+                                    :target "_blank"}
+                                [:span {:style {:color "black"}} (subs x 0 2)]
+                                [:span {:style {:font-size "1.7em"
+                                                :color "black"}} (subs x 2 6)]
+                                [:span {:style {:color "black"}} (subs x 6)] 
                                 ])]
                             ]
                            ]
@@ -127,5 +129,6 @@
           [:br])
 
          [:div {:style {:text-align "right"}} "Curious Technologies GmbH."]
-
-         ]]])))
+         
+         ]]]
+      )))

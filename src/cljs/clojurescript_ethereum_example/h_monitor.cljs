@@ -195,7 +195,7 @@
            layout {;;:title "TEST GRAPH"
                    :xaxis {;;:title "Time"
                            :rangemode "tozero"}
-                   :yaxis {:title "Count of Tx"
+                   :yaxis {:title "Tx"
                            :rangemode "tozero"}
                    :margin {:t 15 :b 25}
                    }]

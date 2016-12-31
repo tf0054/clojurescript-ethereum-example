@@ -19,16 +19,17 @@
             (clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
             {:role "DEALER01"}
             (clojure.string/lower-case "0x78348AA884Cb4b4619514e728631742AE8Dd9927")
+            {:role "DEALER02"}
+            (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
             {:role "CUSTOMER01"}
-
             })
 
 ;; For providing the key
 (def dealers {(clojure.string/lower-case "0x043b8174e15217f187De5629d219e78207f63DCE")
-              {:name "DEALER_A"
+              {:name "DEALER01"
                :key  "key01dealer"}
               (clojure.string/lower-case "0x81e94fBd99290EF5d5E9df9A041a8B8DebdA13E3")
-              {:name "DEALER_B"
+              {:name "DEALER02"
                :key  "key02dealer"}})
 
 (defroutes routes
@@ -70,7 +71,7 @@
                       {}
                       (get users id)))
           }))
-  
+
   (GET "/js/*" _
        {:status 404})
 
@@ -86,7 +87,7 @@
 
   (GET "/cors" _
        {:status  200
-        :headers {"Content-Type"                "text/html; charset=utf-9"
+        :headers {"Content-Type" "text/html; charset=utf-9"
                   "Access-Control-Allow-Origin" "*"}
         :body    (io/input-stream (io/resource "public/index.html"))
         })
@@ -94,7 +95,7 @@
   ;; not used while using figwheel
   (GET "/" _
        {:status  200
-        :headers {"Content-Type"                "text/html; charset=utf-8"
+        :headers {"Content-Type" "text/html; charset=utf-8"
                   "Access-Control-Allow-Origin" "*"}
         :body    (io/input-stream (io/resource "public/index.html"))
         }) 
