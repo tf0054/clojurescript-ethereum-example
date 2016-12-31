@@ -120,7 +120,7 @@
  (fn [db _]
    (console :log "dev/fetch-cars:")
    (let [url   (str "https://webservice.recruit.co.jp/carsensor/usedcar/v1/"
-                    "?key=916f3b97bf003394"
+                    "?key=" (get-in db [:keys :recruit])
                     "&pref=" (+ (rand-int 10) 10)
                     "&price_min=100000&order=5"
                     "&count=5&format=jsonp")

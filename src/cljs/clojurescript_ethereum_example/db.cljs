@@ -4,7 +4,8 @@
    [cljs-web3.core :as web3]))
 
 (def default-db
-  {:tweets         []
+  {:keys           {}
+   :tweets         []
    :filteredTweets []
    :settings       {}
    :my-addresses   []

@@ -75,11 +75,13 @@
        {:status 404})
 
   ;; ENV
-  (GET "/env/:id" [id]
-       (if-let [key (env (keyword id))]
+  (GET "/env/" _
+       (if-let [key (env :recruit)]
          {:status  200
           :headers {"Content-Type" "application/json"}
-          :body    (str "{" id ":\"" key "\"}")}
+          :body    (json/generate-string {:recruit   (env :recruit)
+                                          :etherscan (env :etherscan)
+                                          })}
          {:status 404})) ;; DEBUG
 
   (GET "/cors" _

@@ -46,3 +46,23 @@
      (dispatch [:server/fetch-env])
      (assoc-in db [:new-tweet :role] x))
    ))
+
+(reg-event-fx
+ :server/fetch-env
+ interceptors
+ (fn [{:keys [db]}]
+   (console :log "fetch(env)")
+   {:http-xhrio {:method          :get
+                 :uri             "/env/"
+                 :timeout         6000
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success      [:result-env]
+                 :on-failure      [:log-error]}}))
+
+(reg-event-db
+ :result-env
+ interceptors
+ (fn [db [result]]
+   (console :log "env-set:" result)
+   (assoc-in db [:keys] result))
+ )
